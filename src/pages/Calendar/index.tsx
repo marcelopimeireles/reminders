@@ -2,8 +2,8 @@ import React from 'react';
 
 import { Container } from './styles';
 
-const Calendar: React.FC = ( props:any ) => {
-  return <Container>{ props.children}</Container>;;
-}
+type CalendarProps = { children: React.ReactChild };
+
+const Calendar: React.FC<CalendarProps> = (props: CalendarProps) => <Container>{props.children}</Container>;
 
 export default Calendar;
