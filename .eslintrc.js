@@ -1,31 +1,27 @@
-
-  module.exports = {
-    parser: "@typescript-eslint/parser", 
+module.exports = {
+    parser: '@typescript-eslint/parser',
     parserOptions: {
-      ecmaVersion: 2020, 
-      sourceType: "module", 
-      ecmaFeatures: {
-        jsx: true 
-      }
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        ecmaFeatures: {
+            jsx: true,
+        },
     },
     settings: {
-      react: {
-        version: "detect" 
-      }
+        react: {
+            version: 'detect',
+        },
     },
     extends: [
-      "plugin:react/recommended", 
-      "plugin:@typescript-eslint/recommended", 
-      "prettier/@typescript-eslint", 
-      "plugin:prettier/recommended" 
+        'plugin:react/recommended',
+        'plugin:@typescript-eslint/recommended',
+        'prettier/@typescript-eslint',
+        'plugin:prettier/recommended',
     ],
-    "ignorePatterns": ["**/src/**/*.d.ts", "**/config/**/*.js", "**/scripts/**/*.js", "**/vendor/*.js"],
+    ignorePatterns: ['**/src/**/*.d.ts', '**/config/**/*.js', '**/scripts/**/*.js', '**/vendor/*.js'],
     rules: {
         'prettier/prettier': 'error',
-        'react/jsx-filename-extension': [
-          'warn',
-          { extensions: ['.jsx', '.js', '.ts', '.tsx'] }
-        ],
-        'import/prefer-default-export': 'off'
+        'react/jsx-filename-extension': ['warn', { extensions: ['.jsx', '.js', '.ts', '.tsx'] }],
+        'import/prefer-default-export': 'off',
     },
-  };
+};
