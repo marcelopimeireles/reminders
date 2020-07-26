@@ -7,8 +7,12 @@ import { TiPlus } from 'react-icons/ti';
 
 import { Container, Button } from './styles';
 
-const Day: React.FC<reminderProps> = (props: reminderProps) => {
-    const reminders: reminderType[] = [props.reminder]; // refactor as useState
+type DayCellProps = {
+    day?: number;
+};
+
+const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
+    // const reminders: reminderType[] = [props.reminder]; // refactor as useState
 
     function handleEdit(): string {
         return '';
@@ -19,13 +23,9 @@ const Day: React.FC<reminderProps> = (props: reminderProps) => {
 
     return (
         <Container>
-            <Button onClick={() => 20}>
-                <TiPlus />
-            </Button>
-            <ReminderForm />
-            <>
-                <span>{20}</span>
-                {reminders.length > 0
+            <header>
+                <span>{props.day}</span>
+                {/* {reminders.length > 0
                     ? reminders.map((reminder: reminderType, index) => (
                           <Reminder
                               key={index}
@@ -34,10 +34,15 @@ const Day: React.FC<reminderProps> = (props: reminderProps) => {
                               handleDelete={handleDelete(reminder.id)}
                           />
                       ))
-                    : null}
-            </>
+                    : null} */}
+                <Button onClick={() => handleEdit()}>
+                    <TiPlus />
+                </Button>
+            </header>
+
+            <ReminderForm />
         </Container>
     );
 };
 
-export default Day;
+export default DayCell;

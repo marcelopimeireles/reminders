@@ -1,30 +1,63 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { TiChevronLeft, TiChevronRight } from 'react-icons/ti';
 
-type MonthProps = {
-    prevMonth: string;
-    currentMonth: string;
-    nextMonth: string;
+export type altMonthProps = {
+    date: string;
+    slug: string;
 };
+
+export type currentMonthProps = {
+    date: string;
+    days: number;
+    editDay: [];
+    name: string;
+};
+
+export type MonthProps = {
+    prevMonth: altMonthProps;
+    currentMonth: currentMonthProps;
+    nextMonth: altMonthProps;
+};
+
+export interface IaltMonth {
+    date: string;
+    slug: string;
+}
+
+export interface IcurrentMonth {
+    date: string;
+    days: number;
+    weeks: number;
+    firstWeekDay: number;
+    editDay: [];
+    name: string;
+}
+
+export interface IMonth {
+    prevMonth: IaltMonth;
+    currentMonth: IcurrentMonth;
+    nextMonth: IaltMonth;
+}
 
 import { Container, Row, Col } from './styles';
 
-const MonthHeader: React.FC<MonthProps> = (props: MonthProps) => {
+const MonthHeader: React.FC<MonthProps> = (month: MonthProps) => {
     return (
         <Container>
             <Row>
                 <Col>
-                    <a href={'/' + props.prevMonth}>
+                    <Link to={'/' + month.prevMonth.slug}>
                         <TiChevronLeft />
-                    </a>
+                    </Link>
                 </Col>
                 <Col>
-                    <h1>{props.currentMonth}</h1>
+                    <h1>{month.currentMonth.name}</h1>
                 </Col>
                 <Col>
-                    <a href={'/' + props.nextMonth}>
+                    <Link to={'/' + month.nextMonth.slug}>
                         <TiChevronRight />
-                    </a>
+                    </Link>
                 </Col>
             </Row>
         </Container>

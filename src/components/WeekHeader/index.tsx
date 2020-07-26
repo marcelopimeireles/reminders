@@ -1,12 +1,12 @@
 import React from 'react';
-import { WeekHeaderProps } from '../CalendarBuilder';
 
 import { Container, Weekday } from './styles';
 
-const WeekHeader: React.FC<WeekHeaderProps> = (props: WeekHeaderProps) => {
+const WeekHeader: React.FC = () => {
+    const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     return (
         <Container>
-            {props.days.map((weekday: string, index: number) => (
+            {weekdays.map((weekday: string, index: number) => (
                 <Weekday key={index}>{weekday}</Weekday>
             ))}
         </Container>
