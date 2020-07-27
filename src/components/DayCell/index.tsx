@@ -1,18 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import ReminderForm from './ReminderForm';
 import Reminder, { reminderProps, reminderType } from './Reminder';
 
 import { TiPlus } from 'react-icons/ti';
 
-import { Container, Button } from './styles';
+import { Container, Button, ReminderDot } from './styles';
 
 type DayCellProps = {
     day?: number;
+    reminder?: reminderType;
 };
 
 const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
-    // const reminders: reminderType[] = [props.reminder]; // refactor as useState
+    const [reminders, setReminders] = useState<reminderType[]>([]);
 
     function handleEdit(): string {
         return '';
@@ -21,26 +22,29 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
         return id;
     }
 
+    console.log(reminders);
     return (
         <Container>
             <header>
                 <span>{props.day}</span>
-                {/* {reminders.length > 0
-                    ? reminders.map((reminder: reminderType, index) => (
-                          <Reminder
-                              key={index}
-                              reminder={reminder}
-                              handleEdit={handleEdit()}
-                              handleDelete={handleDelete(reminder.id)}
-                          />
-                      ))
-                    : null} */}
                 <Button onClick={() => handleEdit()}>
                     <TiPlus />
                 </Button>
             </header>
-
-            <ReminderForm />
+            <section>
+                {reminders && reminders.length > 0
+                    ? reminders.map((reminder: reminderType, index) => {
+                          return <ReminderDot key={index} id={reminder.id} color={reminder.color} />;
+                      })
+                    : null}
+            </section>
+            {/*    <Reminder
+            //       key={index}
+            //       reminder={reminder}
+            //       handleEdit={handleEdit()}
+            //       handleDelete={handleDelete(reminder.id)}
+            //   />
+            // <ReminderForm /> */}
         </Container>
     );
 };

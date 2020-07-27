@@ -33,8 +33,9 @@ export const Button = styled.button`
     border: 0;
     color: #e36463;
     border: 1px solid #e36463;
-    display: none;
+    opacity: 0;
     outline: none;
+    display: block;
 
     &:active {
         background-color: #e36463;
@@ -43,5 +44,23 @@ export const Button = styled.button`
 
     ${Container}:hover & {
         display: block;
+        opacity: 1;
+    }
+`;
+
+export const ReminderDot = styled.div`
+    display: inline-block;
+    margin: 8px 8px 0 8px;
+    padding: 0;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background-color: ${(props) => props.color};
+    box-sizing: border-box;
+
+    &:hover {
+        margin: 8px 8px 0 8px;
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        box-shadow: 0 0 5px ${(props) => props.color};
     }
 `;
