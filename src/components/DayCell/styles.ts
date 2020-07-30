@@ -1,4 +1,8 @@
-import styled from 'styled-components';
+import styled, { StyledComponent } from 'styled-components';
+
+interface IPopOver {
+    toggled: boolean;
+}
 
 export const Container = styled.div`
     display: flex;
@@ -17,8 +21,9 @@ export const Container = styled.div`
     box-sizing: border-box;
 
     &:hover {
-        background-color: rgba(255, 255, 255, 0.5);
+        background-color: rgba(255, 255, 255, 0.75);
         color: #e36463;
+        transition: background-color 200ms linear;
     }
 
     header {
@@ -27,15 +32,31 @@ export const Container = styled.div`
         justify-content: space-between;
     }
 `;
-export const Button = styled.button`
+
+export const Close = styled.button`
+    border: 0;
+    background: 0;
     height: 32px;
     width: 32px;
+    outline: 0;
+
+    &:hover {
+        & > svg {
+            transform: scale(1.5);
+            transition: transform 400ms cubic-bezier(0.47, 1.64, 0.41, 0.8);
+        }
+    }
+`;
+
+export const Button = styled.button`
+    display: block;
     border: 0;
+    height: 32px;
+    width: 32px;
     color: #e36463;
     border: 1px solid #e36463;
     opacity: 0;
     outline: none;
-    display: block;
 
     &:active {
         background-color: #e36463;
@@ -45,10 +66,18 @@ export const Button = styled.button`
     ${Container}:hover & {
         display: block;
         opacity: 1;
+        transition: opacity 400ms linear;
+    }
+
+    &:hover {
+        & > svg {
+            transform: scale(1.5);
+            transition: all 400ms cubic-bezier(0.47, 1.64, 0.41, 0.8);
+        }
     }
 `;
 
-export const ReminderDot = styled.div`
+export const ReminderDot = styled.button`
     display: inline-block;
     margin: 8px 8px 0 8px;
     padding: 0;
@@ -62,5 +91,42 @@ export const ReminderDot = styled.div`
         margin: 8px 8px 0 8px;
         border: 1px solid rgba(255, 255, 255, 0.75);
         box-shadow: 0 0 5px ${(props) => props.color};
+    }
+`;
+
+export const PopOver = styled.div<IPopOver>`
+    padding: 8px;
+    display: ${(props) => (props.toggled ? 'block' : 'none')};
+    width: 40%;
+    height: 50vh;
+    overflow: auto;
+    background-color: rgba(255, 255, 255, 1);
+
+    position: fixed;
+    content: '';
+    top: 25vh;
+    left: 30%;
+    &:before {
+        background-color: rgba(0, 0, 0, 0.1);
+        width: 100vw;
+        height: 100vh;
+        z-index: -100;
+        position: fixed;
+        content: '';
+        top: 0;
+        left: 0;
+    }
+    &:after {
+        background-color: rgba(255, 255, 255, 1);
+        width: 40%;
+        height: 50vh;
+        z-index: 100;
+    }
+
+    header {
+        width: 100%;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: flex-end;
     }
 `;
