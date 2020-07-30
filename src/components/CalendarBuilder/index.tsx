@@ -40,19 +40,6 @@ const CalendarBuilder: React.FC<RouteComponentProps> = (props: RouteComponentPro
         setMonth(buildMonth(hash));
     }, [hash, props.location.pathname]);
 
-    // FIX WITH USE REDUCER
-    // const days: React.ReactElement =
-
-    // function handleDays(props: WeekHeaderProps): any {
-    //     const currentDays: StateAction<JSX.Element[]> | null =
-    //         props.days.length != daysElements.length
-    //             ? props.days.map((day: string, index: number) => <Day key={index}>{day}</Day>)
-    //             : null;
-    //     setDaysElements(currentDays);
-    // }
-
-    // useEffect(handleDays(props), [daysElements]);
-
     return (
         <Container>
             <MonthHeader {...month}></MonthHeader>
