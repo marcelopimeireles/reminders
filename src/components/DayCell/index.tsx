@@ -2,7 +2,6 @@ import React, { useState, MouseEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createReminder, updateReminder, deleteReminder } from '../../store/actions';
 
-import ReminderForm from './ReminderForm';
 import Reminder, { reminderType } from './Reminder';
 
 import { TiPlus } from 'react-icons/ti';
@@ -55,7 +54,6 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
             <header>
                 <span>{props.day}</span>
                 <Button onClick={handleNewReminder}>
-                    {/* togglePopOver */}
                     <TiPlus />
                 </Button>
             </header>
@@ -82,7 +80,6 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
                     </Close>
                 </header>
                 <Reminder reminder={reminder} handleDelete={handleDelete} />
-                <ReminderForm />
             </PopOver>
         </Container>
     );
