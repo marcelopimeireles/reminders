@@ -3,8 +3,7 @@ import { SubmitHandler, FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import { reminderType } from '../Reminder';
 
-// import ReactTimePicker from 'react-ts-timepicker';
-import { Container, ColorPicker, Radio, RadioInput } from './styles';
+import { Container, ColorPicker, Radio, RadioInput, TimePicker, Text } from './styles';
 
 type ReminderFormProps = {
     reminder: reminderType | null | undefined;
@@ -19,8 +18,34 @@ export interface FormData {
 }
 
 const ReminderForm: React.FC<ReminderFormProps> = (props: ReminderFormProps) => {
-    const [time, setTime] = useState('10:00');
+    const [time, setTime] = useState('10 : 00 AM');
     const colors = ['red', 'blue', 'green', 'black'];
+    const hours = [
+        '01:00 AM',
+        '02:00 AM',
+        '03:00 AM',
+        '04:00 AM',
+        '05:00 AM',
+        '06:00 AM',
+        '07:00 AM',
+        '08:00 AM',
+        '09:00 AM',
+        '10:00 AM',
+        '11:00 AM',
+        '12:00 AM',
+        '01:00 PM',
+        '02:00 PM',
+        '03:00 PM',
+        '04:00 PM',
+        '05:00 PM',
+        '06:00 PM',
+        '07:00 PM',
+        '08:00 PM',
+        '09:00 PM',
+        '10:00 PM',
+        '11:00 PM',
+        '12:00 PM',
+    ];
 
     const formRef = useRef<FormHandles>(null);
 
@@ -33,16 +58,25 @@ const ReminderForm: React.FC<ReminderFormProps> = (props: ReminderFormProps) => 
             <Form ref={formRef} onSubmit={handleSubmit}>
                 <textarea name="description" placeholder="Reminder" />
 
-                {/* <ReactTimePicker value={time} /> */}
+                <TimePicker name="time">
+                    {hours.map((hour, index) => (
+                        <option key={index} value={hour}>
+                            {hour}
+                        </option>
+                    ))}
+                </TimePicker>
 
                 <ColorPicker>
                     {colors.map((color, index) => {
-                        <Radio key={color + index}>
-                            <label>
-                                <RadioInput name="color" value={color} checked={index === 0} />
-                                {color}
-                            </label>
-                        </Radio>;
+                        return (
+                            <Radio key={color + index}>
+                                <label>
+                                    <RadioInput color={color} />
+                                    <div className="checkmark" />
+                                    <Text>{color}</Text>
+                                </label>
+                            </Radio>
+                        );
                     })}
                 </ColorPicker>
 
