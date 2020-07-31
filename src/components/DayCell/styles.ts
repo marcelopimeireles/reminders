@@ -97,15 +97,17 @@ export const ReminderDot = styled.button`
 export const PopOver = styled.div<IPopOver>`
     padding: 8px;
     display: ${(props) => (props.toggled ? 'block' : 'none')};
-    width: 40%;
-    height: 50vh;
+    min-height: 20vh;
+    height: auto;
     overflow: auto;
     background-color: rgba(255, 255, 255, 1);
 
     position: fixed;
     content: '';
     top: 25vh;
-    left: 30%;
+    left: 20%;
+    width: 60%;
+
     &:before {
         background-color: rgba(0, 0, 0, 0.1);
         width: 100vw;
@@ -118,7 +120,7 @@ export const PopOver = styled.div<IPopOver>`
     }
     &:after {
         background-color: rgba(255, 255, 255, 1);
-        width: 40%;
+        width: 60%;
         height: 50vh;
         z-index: 100;
     }
@@ -127,6 +129,11 @@ export const PopOver = styled.div<IPopOver>`
         width: 100%;
         box-sizing: border-box;
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
+        h1 {
+            color: #666;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
     }
 `;

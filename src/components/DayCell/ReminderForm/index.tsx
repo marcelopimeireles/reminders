@@ -3,7 +3,7 @@ import { SubmitHandler, FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import { reminderType } from '../Reminder';
 
-import { Container, ColorPicker, Radio, RadioInput, TimePicker, Text } from './styles';
+import { Container, Row, Textarea, ColorPicker, Radio, RadioInput, TimePicker, Text, SaveButton } from './styles';
 
 type ReminderFormProps = {
     reminder: reminderType | null | undefined;
@@ -56,7 +56,7 @@ const ReminderForm: React.FC<ReminderFormProps> = (props: ReminderFormProps) => 
     return (
         <Container>
             <Form ref={formRef} onSubmit={handleSubmit}>
-                <textarea name="description" placeholder="Reminder" />
+                <Textarea name="description" placeholder="Description" />
 
                 <TimePicker name="time">
                     {hours.map((hour, index) => (
@@ -65,12 +65,11 @@ const ReminderForm: React.FC<ReminderFormProps> = (props: ReminderFormProps) => 
                         </option>
                     ))}
                 </TimePicker>
-
                 <ColorPicker>
                     {colors.map((color, index) => {
                         return (
                             <Radio key={color + index}>
-                                <label>
+                                <label style={{ width: '100%' }}>
                                     <RadioInput color={color} />
                                     <div className="checkmark" />
                                     <Text>{color}</Text>
@@ -80,11 +79,7 @@ const ReminderForm: React.FC<ReminderFormProps> = (props: ReminderFormProps) => 
                     })}
                 </ColorPicker>
 
-                <button className="btn-submit">Salvar</button>
-
-                <button className="btn-cancel" onClick={() => null}>
-                    Cancel
-                </button>
+                <SaveButton className="btn-submit">Salvar</SaveButton>
             </Form>
         </Container>
     );

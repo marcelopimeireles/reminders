@@ -53,7 +53,7 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
         <Container>
             <header>
                 <span>{props.day}</span>
-                <Button onClick={handleNewReminder}>
+                <Button onClick={handleNewReminder} disabled={togglePopOver}>
                     <TiPlus />
                 </Button>
             </header>
@@ -75,6 +75,7 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
             </section>
             <PopOver toggled={togglePopOver}>
                 <header>
+                    <h1>{props.day}</h1>
                     <Close onClick={() => setTogglePopOver(false)}>
                         <MdClose />
                     </Close>
