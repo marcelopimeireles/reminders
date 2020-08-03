@@ -1,87 +1,83 @@
-import React, { useState, MouseEvent } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { createReminder, updateReminder, deleteReminder } from '../../store/actions';
-
+import React, { MouseEvent, useContext, useEffect } from 'react';
+import { format } from 'date-fns';
 import Reminder, { reminderType } from './Reminder';
 
 import { TiPlus } from 'react-icons/ti';
-import { MdClose } from 'react-icons/md';
 
 import { Container, Button, ReminderDot, PopOver, Close } from './styles';
 
+import { CalendarCtx, CalendarContextInterface } from '../CalendarProvider';
+
 type DayCellProps = {
-    day?: number;
+    day: number;
     handleSetEditDay?: (day?: number) => any;
 };
 
 const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
-    const [reminder, setReminder] = useState<reminderType>({
-        id: null,
-        time: null,
-        description: null,
-        color: null,
-    });
-    const [reminders, setReminders] = useState<reminderType[]>([reminder]);
-    const [editReminder, setEditReminder] = useState<reminderType | undefined>();
-    const [togglePopOver, setTogglePopOver] = useState<boolean>(false);
+    const { day } = props;
+    const { month } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { togglePopOver, setTogglePopOver } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { today, setToday } = useContext<CalendarContextInterface>(CalendarCtx);
 
-    // const reminders: reminderType[] = useSelector((state: { reminders: reminderType[] }) => state.reminders);
-    const dispatch = useDispatch();
+    // const { reminder, setReminder } = useContext(CalendarCtx);
+    // const { editReminder, setEditReminder } = useContext(CalendarCtx);
 
-    function handleEdit(): void {
-        if (props.day) {
-            // props.handleSetEditDay(props.day);
-        }
-        setEditReminder(reminder);
+    function handleDay(day: number): string {
+        return day.toString().length > 1 ? day.toString() : '0'.concat(day.toString());
     }
 
-    function handleDelete(id: string | null | undefined): string | null | undefined {
-        return id;
-    }
+    // function handleEdit(): void {
+    //     if (props.day) {
+    //         // props.handleSetEditDay(props.day);
+    //     }
+    //     setEditReminder(reminder);
+    // }
 
-    function handleNewReminder(event: MouseEvent): void {
-        event.stopPropagation();
-        setTogglePopOver(true);
-    }
+    // function handleDelete(id: string | null | undefined): string | null | undefined {
+    //     return id;
+    // }
 
-    function handleSaveNewReminder(): void {
-        dispatch(createReminder(editReminder));
-        setTogglePopOver(false);
+    // function handleNewReminder(event: MouseEvent): void {
+    //     event.stopPropagation();
+    //     setTogglePopOver(true);
+    // }
+
+    // function handleSaveNewReminder(): void {
+    //     dispatch(createReminder(editReminder));
+    //     setTogglePopOver(false);
+    // }
+
+    function handleToggle() {
+        const prefix = handleDay(day);
+        const todayString = `${month?.currentMonth?.date}-${prefix}`;
+        setToday ? setToday(format(new Date(todayString), 'dd MMM yy')) : null;
+        setTogglePopOver ? setTogglePopOver(!togglePopOver) : null;
     }
 
     return (
         <Container>
             <header>
-                <span>{props.day}</span>
-                <Button onClick={handleNewReminder} disabled={togglePopOver}>
+                <span>{day}</span>
+                <Button disabled={togglePopOver} onClick={() => handleToggle()}>
                     <TiPlus />
                 </Button>
             </header>
             <section>
-                {reminders && reminders.length > 0
+                {/* {reminders && reminders.length > 0
                     ? reminders.map((reminder: reminderType, index) => {
                           return (
                               <>
-                                  {/* <ReminderDot
+                                  <ReminderDot
                                       key={index}
                                       id={reminder.id}
                                       color={reminder.color}
                                       onClick={() => handleEdit()}
-                                  /> */}
+                                  />
                               </>
                           );
                       })
-                    : null}
+                    : null} */}
             </section>
-            <PopOver toggled={togglePopOver}>
-                <header>
-                    <h1>{props.day}</h1>
-                    <Close onClick={() => setTogglePopOver(false)}>
-                        <MdClose />
-                    </Close>
-                </header>
-                <Reminder reminder={reminder} handleDelete={handleDelete} />
-            </PopOver>
         </Container>
     );
 };
