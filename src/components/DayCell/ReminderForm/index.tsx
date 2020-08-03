@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { SubmitHandler, FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import { reminderType } from '../Reminder';
@@ -12,9 +12,10 @@ type ReminderFormProps = {
 };
 
 export interface FormData {
-    time: Date | null | undefined;
-    description: string | null | undefined;
-    color: string | null | undefined;
+    id?: string;
+    timeDate?: Date | null;
+    description?: string | null;
+    color?: string | null;
 }
 
 const ReminderForm: React.FC<ReminderFormProps> = (props: ReminderFormProps) => {

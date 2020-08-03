@@ -1,7 +1,9 @@
-import React, { useState, createContext, Context } from 'react';
+import React, { useState, createContext, useEffect } from 'react';
+import { format } from 'date-fns';
+import { groupBy } from 'lodash';
 
 import { IMonth } from '../MonthHeader';
-import { format } from 'date-fns';
+import { reminderType } from '../DayCell/Reminder';
 
 type SetString = (value: any | null) => void;
 
@@ -22,6 +24,9 @@ export interface CalendarContextInterface {
     setTogglePopOver?: SetString;
     today?: string | null;
     setToday?: SetString;
+    reminders?: reminderType[] | null;
+    setReminders?: SetString;
+    remindersList?: any | undefined[];
 }
 
 export const CalendarCtx = createContext<CalendarContextInterface>({});
@@ -62,6 +67,16 @@ const CalendarProvider: React.FC = (props) => {
     const [color, setColor] = useState(null);
     const [togglePopOver, setTogglePopOver] = useState(false);
     const [today, setToday] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [reminders, setReminders] = useState([]);
+    let remindersList = null;
+
+    function saveReminders() {
+        remindersList = groupBy(reminders, 'dateTime');
+    }
+
+    useEffect(() => {
+        saveReminders;
+    }, [reminders]);
 
     return (
         <CalendarCtx.Provider
@@ -82,6 +97,9 @@ const CalendarProvider: React.FC = (props) => {
                 setTogglePopOver,
                 today,
                 setToday,
+                reminders,
+                setReminders,
+                remindersList,
             }}
         >
             {props?.children}

@@ -12,7 +12,7 @@ export type reminderProps = {
 
 export type reminderType = {
     id?: string | null | undefined;
-    time: Date | null | undefined;
+    dateTime: Date | null | undefined;
     description: string | null | undefined;
     color: string | null | undefined;
 };
@@ -30,7 +30,7 @@ const Reminder: React.FC<reminderProps> = (props: reminderProps) => {
             {props.reminder?.id ? (
                 <>
                     <strong>{props.reminder?.description}</strong>
-                    <time>{props.reminder?.time}</time>
+                    <time>{props.reminder?.dateTime}</time>
                 </>
             ) : (
                 <ReminderForm reminder={props.reminder || null} />

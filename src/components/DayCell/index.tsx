@@ -1,10 +1,10 @@
-import React, { MouseEvent, useContext, useEffect } from 'react';
+import React, { MouseEvent, useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import Reminder, { reminderType } from './Reminder';
 
 import { TiPlus } from 'react-icons/ti';
 
-import { Container, Button, ReminderDot, PopOver, Close } from './styles';
+import { Container, Button, ReminderDot } from './styles';
 
 import { CalendarCtx, CalendarContextInterface } from '../CalendarProvider';
 
@@ -17,7 +17,11 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     const { day } = props;
     const { month } = useContext<CalendarContextInterface>(CalendarCtx);
     const { togglePopOver, setTogglePopOver } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { today, setToday } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { setToday } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { reminders, setReminders } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { remindersList } = useContext<CalendarContextInterface>(CalendarCtx);
+    const [todayList, setTodayList] = useState<string>('');
+    const [hasReminders, setHasReminders] = useState<boolean | null>(false);
 
     // const { reminder, setReminder } = useContext(CalendarCtx);
     // const { editReminder, setEditReminder } = useContext(CalendarCtx);
@@ -26,12 +30,13 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
         return day.toString().length > 1 ? day.toString() : '0'.concat(day.toString());
     }
 
-    // function handleEdit(): void {
-    //     if (props.day) {
-    //         // props.handleSetEditDay(props.day);
-    //     }
-    //     setEditReminder(reminder);
-    // }
+    function handleEdit(): void {
+        // if (props.day) {
+        // props.handleSetEditDay(props.day);
+        // }
+        // setEditReminder(reminder);
+        console.log('Edit');
+    }
 
     // function handleDelete(id: string | null | undefined): string | null | undefined {
     //     return id;
@@ -50,9 +55,24 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     function handleToggle() {
         const prefix = handleDay(day);
         const todayString = `${month?.currentMonth?.date}-${prefix}`;
+        setTodayList(format(new Date(todayString), 'yyyy-MM-dd'));
         setToday ? setToday(format(new Date(todayString), 'dd MMM yy')) : null;
         setTogglePopOver ? setTogglePopOver(!togglePopOver) : null;
     }
+
+    function convertToBoolean(input: string | null): boolean {
+        try {
+            return input ? JSON.parse(input) : false;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    useEffect(() => {
+        const hasDate = todayList ? remindersList[todayList].length > 0 : false;
+        const checkHasReminders: boolean = remindersList && convertToBoolean(todayList) && hasDate;
+        setHasReminders(checkHasReminders);
+    }, [remindersList, hasReminders]);
 
     return (
         <Container>
@@ -63,20 +83,14 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
                 </Button>
             </header>
             <section>
-                {/* {reminders && reminders.length > 0
-                    ? reminders.map((reminder: reminderType, index) => {
-                          return (
-                              <>
-                                  <ReminderDot
-                                      key={index}
-                                      id={reminder.id}
-                                      color={reminder.color}
-                                      onClick={() => handleEdit()}
-                                  />
-                              </>
-                          );
+                {hasReminders}
+                {hasReminders
+                    ? remindersList[todayList]?.map((reminder: reminderType, index: number) => {
+                          return reminder ? (
+                              <ReminderDot key={index} color={reminder.color} onClick={() => handleEdit()} />
+                          ) : null;
                       })
-                    : null} */}
+                    : null}
             </section>
         </Container>
     );
