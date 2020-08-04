@@ -1,87 +1,94 @@
-import React, { useState, useRef, useContext } from 'react';
-import { SubmitHandler, FormHandles } from '@unform/core';
-import { Form } from '@unform/web';
+import React, { useState, useContext } from 'react';
+
+import { v1 as uuidV1 } from 'uuid';
+import { format } from 'date-fns';
+
+import { CalendarCtx } from '../../CalendarProvider';
+
 import { reminderType } from '../Reminder';
 
-import { Container, Row, Textarea, ColorPicker, Radio, RadioInput, TimePicker, Text, SaveButton } from './styles';
+import { Container, Textarea, ColorPicker, Radio, RadioInput, TimePicker, Text, SaveButton } from './styles';
 
-type ReminderFormProps = {
-    reminder: reminderType | null | undefined;
-    handleCreateUpdateReminder?: () => null;
-    handleSetEditDay?: () => null;
-};
+const ReminderForm: React.FC = () => {
+    const { reminders, setReminders } = useContext(CalendarCtx);
+    const { togglePopOver, setTogglePopOver } = useContext(CalendarCtx);
+    const { todayKey } = useContext(CalendarCtx);
+    const { currentId } = useContext(CalendarCtx);
+    const { colors, hours } = useContext(CalendarCtx);
+    const [color, setColor] = useState<string>('');
+    const [description, setDescription] = useState<string>('');
+    const [dateTime, setDateTime] = useState<Date>(new Date());
+    const [id] = useState<string>(uuidV1());
 
-export interface FormData {
-    id?: string;
-    timeDate?: Date | null;
-    description?: string | null;
-    color?: string | null;
-}
+    function handleSubmit(e: any) {
+        e.preventDefault();
+        console.log({ color, description, dateTime, id });
 
-const ReminderForm: React.FC<ReminderFormProps> = (props: ReminderFormProps) => {
-    const [time, setTime] = useState('10 : 00 AM');
-    const colors = ['red', 'blue', 'green', 'black'];
-    const hours = [
-        '01:00 AM',
-        '02:00 AM',
-        '03:00 AM',
-        '04:00 AM',
-        '05:00 AM',
-        '06:00 AM',
-        '07:00 AM',
-        '08:00 AM',
-        '09:00 AM',
-        '10:00 AM',
-        '11:00 AM',
-        '12:00 AM',
-        '01:00 PM',
-        '02:00 PM',
-        '03:00 PM',
-        '04:00 PM',
-        '05:00 PM',
-        '06:00 PM',
-        '07:00 PM',
-        '08:00 PM',
-        '09:00 PM',
-        '10:00 PM',
-        '11:00 PM',
-        '12:00 PM',
-    ];
+        if (description && dateTime && color) {
+            if (currentId === id) {
+                // saveEdit
+            } else {
+                // saveNew
+                const data: reminderType = { color, description, dateTime, id };
+                const result: reminderType[] = [...reminders].concat(data);
+                setReminders && setReminders(result);
+            }
+        }
+        setTogglePopOver && setTogglePopOver(!togglePopOver);
+    }
 
-    const formRef = useRef<FormHandles>(null);
-
-    const handleSubmit: SubmitHandler<FormData> = (reminder: FormData) => {
-        console.log(formRef);
-    };
+    function changeHour(e: any = null) {
+        e.preventDefault();
+        const hourArray: string[] = e ? e.target.value.split(':') : hours && hours[0].split(':');
+        let result = Number(hourArray[0]);
+        let date: Date;
+        if (hourArray.length > 0 && hourArray[1].indexOf('PM') !== -1) {
+            result = result + 12;
+        }
+        const prefix = result < 10 ? '0' : '';
+        if (todayKey) {
+            date = new Date(`${todayKey}T${prefix}${result}:00:00Z`);
+        } else {
+            date = new Date(`${format(new Date(), 'yyyy-MM-dd')}T${prefix}${result}:00:00Z`);
+        }
+        setDateTime(date);
+        return date;
+    }
 
     return (
         <Container>
-            <Form ref={formRef} onSubmit={handleSubmit}>
-                <Textarea name="description" placeholder="Description" />
+            <form onSubmit={(e) => handleSubmit(e)}>
+                <Textarea
+                    name="description"
+                    placeholder="Description"
+                    onChange={(e) => setDescription(e.currentTarget.value)}
+                />
 
-                <TimePicker name="time">
-                    {hours.map((hour, index) => (
-                        <option key={index} value={hour}>
-                            {hour}
-                        </option>
-                    ))}
+                <TimePicker name="dateTime" onChange={(e) => changeHour(e)}>
+                    {hours &&
+                        hours.map((hour, index) => (
+                            <option key={index} value={hour}>
+                                {hour}
+                            </option>
+                        ))}
                 </TimePicker>
                 <ColorPicker>
-                    {colors.map((color, index) => {
-                        return (
-                            <Radio key={color + index}>
-                                <label style={{ width: '100%' }}>
-                                    <RadioInput color={color} />
-                                    <div className="checkmark" />
-                                    <Text>{color}</Text>
-                                </label>
-                            </Radio>
-                        );
-                    })}
+                    {colors &&
+                        colors.map((color, index) => {
+                            return (
+                                <Radio key={color + index}>
+                                    <label style={{ width: '100%' }} onChange={() => setColor(color)}>
+                                        <RadioInput color={color} />
+                                        <div className="checkmark" />
+                                        <Text>{color}</Text>
+                                    </label>
+                                </Radio>
+                            );
+                        })}
                 </ColorPicker>
 
                 <SaveButton className="btn-submit">Salvar</SaveButton>
-            </Form>
+            </form>
         </Container>
     );
 };

@@ -1,19 +1,20 @@
 import React, { useContext } from 'react';
 
-import { CalendarCtx, CalendarContextInterface } from '../CalendarProvider';
+import Reminder from '../DayCell/Reminder';
+
+import { CalendarCtx } from '../CalendarProvider';
 
 import { MdClose } from 'react-icons/md';
 
 import { Container, Close } from './styles';
 
-function PopOver() {
+const PopOver: React.FC = () => {
     const { togglePopOver, setTogglePopOver } = useContext(CalendarCtx);
     const { today, setToday } = useContext(CalendarCtx);
 
     function handleToggle() {
         setToday ? setToday(null) : null;
         setTogglePopOver ? setTogglePopOver(!togglePopOver) : null;
-        console.log(togglePopOver);
     }
 
     return (
@@ -24,9 +25,9 @@ function PopOver() {
                     <MdClose />
                 </Close>
             </header>
-            {/* <Reminder reminder={reminder} handleDelete={handleDelete} /> */}
+            <Reminder />
         </Container>
     );
-}
+};
 
 export default PopOver;

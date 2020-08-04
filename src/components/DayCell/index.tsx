@@ -1,6 +1,8 @@
-import React, { MouseEvent, useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import Reminder, { reminderType } from './Reminder';
+import { Dictionary, groupBy } from 'lodash';
+
+import { reminderType } from './Reminder';
 
 import { TiPlus } from 'react-icons/ti';
 
@@ -10,7 +12,6 @@ import { CalendarCtx, CalendarContextInterface } from '../CalendarProvider';
 
 type DayCellProps = {
     day: number;
-    handleSetEditDay?: (day?: number) => any;
 };
 
 const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
@@ -18,49 +19,39 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     const { month } = useContext<CalendarContextInterface>(CalendarCtx);
     const { togglePopOver, setTogglePopOver } = useContext<CalendarContextInterface>(CalendarCtx);
     const { setToday } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { reminders, setReminders } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { remindersList } = useContext<CalendarContextInterface>(CalendarCtx);
-    const [todayList, setTodayList] = useState<string>('');
+    const { todayKey, setTodayKey } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { reminders } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { remindersList, setRemindersList } = useContext<CalendarContextInterface>(CalendarCtx);
     const [hasReminders, setHasReminders] = useState<boolean | null>(false);
 
     // const { reminder, setReminder } = useContext(CalendarCtx);
-    // const { editReminder, setEditReminder } = useContext(CalendarCtx);
+    const { setCurrentId } = useContext(CalendarCtx);
 
     function handleDay(day: number): string {
         return day.toString().length > 1 ? day.toString() : '0'.concat(day.toString());
     }
 
-    function handleEdit(): void {
-        // if (props.day) {
-        // props.handleSetEditDay(props.day);
-        // }
-        // setEditReminder(reminder);
+    function handleEdit(id = '') {
         console.log('Edit');
+        setCurrentId && setCurrentId(id);
     }
-
-    // function handleDelete(id: string | null | undefined): string | null | undefined {
-    //     return id;
-    // }
-
-    // function handleNewReminder(event: MouseEvent): void {
-    //     event.stopPropagation();
-    //     setTogglePopOver(true);
-    // }
-
-    // function handleSaveNewReminder(): void {
-    //     dispatch(createReminder(editReminder));
-    //     setTogglePopOver(false);
-    // }
 
     function handleToggle() {
         const prefix = handleDay(day);
         const todayString = `${month?.currentMonth?.date}-${prefix}`;
-        setTodayList(format(new Date(todayString), 'yyyy-MM-dd'));
-        setToday ? setToday(format(new Date(todayString), 'dd MMM yy')) : null;
-        setTogglePopOver ? setTogglePopOver(!togglePopOver) : null;
+        const today = format(new Date(todayString), 'yyyy-MM-dd');
+        setTodayKey && setTodayKey(today);
+        setToday && setToday(format(new Date(todayString), 'dd MMM yy'));
+        setTogglePopOver && setTogglePopOver(!togglePopOver);
+        console.log(today, todayKey);
     }
 
-    function convertToBoolean(input: string | null): boolean {
+    function saveReminders() {
+        const newList: Dictionary<reminderType[]> = groupBy(reminders, 'dateTime');
+        setRemindersList ? setRemindersList(newList) : null;
+    }
+
+    function convertToBoolean(input: string | undefined | null): boolean {
         try {
             return input ? JSON.parse(input) : false;
         } catch (e) {
@@ -69,10 +60,11 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     }
 
     useEffect(() => {
-        const hasDate = todayList ? remindersList[todayList].length > 0 : false;
-        const checkHasReminders: boolean = remindersList && convertToBoolean(todayList) && hasDate;
+        const hasDate: boolean = remindersList && todayKey ? remindersList[todayKey]?.length > 0 : false;
+        const checkHasReminders: boolean = convertToBoolean(todayKey) && hasDate;
         setHasReminders(checkHasReminders);
-    }, [remindersList, hasReminders]);
+        saveReminders();
+    }, [reminders, hasReminders, setCurrentId]);
 
     return (
         <Container>
@@ -83,12 +75,9 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
                 </Button>
             </header>
             <section>
-                {hasReminders}
-                {hasReminders
-                    ? remindersList[todayList]?.map((reminder: reminderType, index: number) => {
-                          return reminder ? (
-                              <ReminderDot key={index} color={reminder.color} onClick={() => handleEdit()} />
-                          ) : null;
+                {hasReminders && remindersList && todayKey
+                    ? remindersList[todayKey].map((reminder: reminderType, index: number) => {
+                          return reminder ? <ReminderDot key={index} onClick={() => handleEdit(reminder.id)} /> : null;
                       })
                     : null}
             </section>

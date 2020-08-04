@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { TiChevronLeft, TiChevronRight } from 'react-icons/ti';
-import { CalendarCtx, CalendarContextInterface } from '../CalendarProvider';
+import { CalendarCtx } from '../CalendarProvider';
 
 export interface IAltMonth {
     date: string;
@@ -25,7 +25,7 @@ export interface IMonth {
 
 import { Container, Row, Col } from './styles';
 
-const MonthHeader: React.FC<any> = () => {
+const MonthHeader: React.FC = () => {
     const { month } = useContext(CalendarCtx);
 
     return (

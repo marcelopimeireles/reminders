@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Route, Switch, HashRouter, RouteComponentProps } from 'react-router-dom';
+import React from 'react';
+import { Route, Switch, HashRouter } from 'react-router-dom';
 import Calendar from './pages/Calendar';
 import CalendarProvider from './components/CalendarProvider';
 

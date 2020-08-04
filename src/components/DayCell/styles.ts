@@ -1,6 +1,4 @@
-import styled, { StyledComponent } from 'styled-components';
-
-import { FormData } from './ReminderForm/index';
+import styled from 'styled-components';
 
 interface IPopOver {
     toggled: boolean;
@@ -79,10 +77,7 @@ export const Button = styled.button`
     }
 `;
 
-export const ReminderDot = styled.button.attrs((props: FormData) => ({
-    id: props.id,
-    color: props.color,
-}))`
+export const ReminderDot = styled.button`
     display: inline-block;
     margin: 8px 8px 0 8px;
     padding: 0;

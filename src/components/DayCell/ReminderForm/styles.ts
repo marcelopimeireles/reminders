@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FormData } from './index';
+import { reminderType } from '../Reminder';
 
 export const Container = styled.div`
     text-align: left;
@@ -53,7 +53,7 @@ export const Radio = styled.div`
         width: 100%;
     }
 `;
-export const RadioInput = styled.input.attrs((props: FormData) => ({
+export const RadioInput = styled.input.attrs((props: reminderType) => ({
     type: 'radio',
     name: 'color',
     id: props.color,
