@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { FiTrash } from 'react-icons/fi';
+import { FiTrash, FiEdit } from 'react-icons/fi';
 
 import { CalendarCtx } from '../../CalendarProvider';
 import ReminderForm from '../ReminderForm';
@@ -8,52 +8,64 @@ import { Container, Tools, Button } from './styles';
 
 export type reminderType = {
     id?: string;
-    dateTime?: Date | null;
-    description?: string | null;
-    color?: string | null;
+    date?: string;
+    time?: string;
+    description?: string;
+    color?: string;
 };
 
 const Reminder: React.FC = () => {
-    const { currentId } = useContext(CalendarCtx);
+    const { currentId, togglePopOver } = useContext(CalendarCtx);
     const { reminders, setReminders } = useContext(CalendarCtx);
-    const [reminder, setReminder] = useState<reminderType>({});
-    const [delRems, setDelRems] = useState<reminderType[]>([]);
+
+    const [localReminder, setlocalReminder] = useState<reminderType>({});
+    const [isEditMode, setIsEditMode] = useState<boolean>(false);
+
+    const [delReminders, setDelReminders] = useState<reminderType[]>([]);
 
     function handleDelete(data: reminderType) {
         const id = data.id;
-        setDelRems(
+        setDelReminders(
             [...reminders].filter((item: reminderType) => {
                 return item.id !== id;
             })
         );
+        (async () => {
+            setReminders && setReminders(delReminders);
+        })();
     }
 
     useEffect(() => {
+        if (togglePopOver === false) return;
         if (currentId)
-            setReminder(
-                [...reminders].filter((reminder) => {
-                    reminder.id ? reminder.id === currentId : null;
-                })[0]
-            );
-        setReminders && setReminders(delRems);
-    }, [currentId, reminder, delRems, reminders, setReminders, reminder]);
+            (async () => {
+                setlocalReminder(
+                    [...reminders].filter((reminder) => {
+                        reminder.id ? reminder.id === currentId : null;
+                    })[0]
+                );
+            })();
+    }, [togglePopOver, currentId, reminders]);
 
     return (
         <Container>
-            <Tools>
-                {currentId ? (
-                    <Button onClick={() => handleDelete(reminder)}>
-                        <FiTrash />
-                    </Button>
-                ) : null}
-            </Tools>
-            {currentId ? (
-                <>
-                    <strong>{reminder.description}</strong>
-                    <time>{reminder.dateTime}</time>
-                </>
-            ) : (
+            {isEditMode ? (
                 <ReminderForm />
+            ) : (
+                <>
+                    <Tools>
+                        <Button onClick={() => handleDelete(localReminder)}>
+                            <FiTrash />
+                        </Button>
+                        <Button onClick={() => setIsEditMode(true)}>
+                            <FiEdit />
+                        </Button>
+                    </Tools>
+
+                    <strong>{localReminder.description}</strong>
+                    <time>{localReminder.date}</time>
+                    <time>{localReminder.time}</time>
+                </>
             )}
         </Container>
     );

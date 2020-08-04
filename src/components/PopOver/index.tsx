@@ -1,4 +1,5 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { format } from 'date-fns';
 
 import Reminder from '../DayCell/Reminder';
 
@@ -12,15 +13,22 @@ const PopOver: React.FC = () => {
     const { togglePopOver, setTogglePopOver } = useContext(CalendarCtx);
     const { today, setToday } = useContext(CalendarCtx);
 
+    const [localDay, setLocalDay] = useState('');
+
     function handleToggle() {
-        setToday ? setToday(null) : null;
         setTogglePopOver ? setTogglePopOver(!togglePopOver) : null;
     }
+
+    useEffect(() => {
+        (async () => {
+            if (today && togglePopOver) setLocalDay(format(new Date(today), 'dd MMM yy'));
+        })();
+    }, [today, togglePopOver]);
 
     return (
         <Container toggled={togglePopOver || false}>
             <header>
-                <h1>{today}</h1>
+                <h1>{localDay}</h1>
                 <Close onClick={() => handleToggle()}>
                     <MdClose />
                 </Close>

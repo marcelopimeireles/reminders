@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Dictionary, groupBy } from 'lodash';
+import { Dictionary, groupBy, isEmpty, has } from 'lodash';
 
 import { reminderType } from './Reminder';
 
@@ -15,56 +15,46 @@ type DayCellProps = {
 };
 
 const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
-    const { day } = props;
     const { month } = useContext<CalendarContextInterface>(CalendarCtx);
     const { togglePopOver, setTogglePopOver } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { setToday } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { todayKey, setTodayKey } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { reminders } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { remindersList, setRemindersList } = useContext<CalendarContextInterface>(CalendarCtx);
-    const [hasReminders, setHasReminders] = useState<boolean | null>(false);
-
-    // const { reminder, setReminder } = useContext(CalendarCtx);
+    const { today, setToday } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { remindersList } = useContext<CalendarContextInterface>(CalendarCtx);
     const { setCurrentId } = useContext(CalendarCtx);
 
+    const { day } = props;
+
+    const [todayReminders, setTodayReminders] = useState<reminderType[] | null>([]);
+
     function handleDay(day: number): string {
-        return day.toString().length > 1 ? day.toString() : '0'.concat(day.toString());
+        return ('0' + day.toString()).slice(-2);
     }
 
     function handleEdit(id = '') {
-        console.log('Edit');
+        console.log('Edit id ', id);
         setCurrentId && setCurrentId(id);
+        handleToggle();
     }
 
     function handleToggle() {
         const prefix = handleDay(day);
         const todayString = `${month?.currentMonth?.date}-${prefix}`;
         const today = format(new Date(todayString), 'yyyy-MM-dd');
-        setTodayKey && setTodayKey(today);
-        setToday && setToday(format(new Date(todayString), 'dd MMM yy'));
-        setTogglePopOver && setTogglePopOver(!togglePopOver);
-        console.log(today, todayKey);
-    }
 
-    function saveReminders() {
-        const newList: Dictionary<reminderType[]> = groupBy(reminders, 'dateTime');
-        setRemindersList ? setRemindersList(newList) : null;
-    }
-
-    function convertToBoolean(input: string | undefined | null): boolean {
-        try {
-            return input ? JSON.parse(input) : false;
-        } catch (e) {
-            return false;
-        }
+        (async () => {
+            setToday && setToday(today);
+            setTogglePopOver && setTogglePopOver(!togglePopOver);
+        })();
     }
 
     useEffect(() => {
-        const hasDate: boolean = remindersList && todayKey ? remindersList[todayKey]?.length > 0 : false;
-        const checkHasReminders: boolean = convertToBoolean(todayKey) && hasDate;
-        setHasReminders(checkHasReminders);
-        saveReminders();
-    }, [reminders, hasReminders, setCurrentId]);
+        if (isEmpty(today) || isEmpty(remindersList)) return;
+
+        if (today && has(remindersList, today)) {
+            (async () => {
+                today && remindersList && setTodayReminders(remindersList[today]);
+            })();
+        }
+    }, [today, remindersList]);
 
     return (
         <Container>
@@ -75,11 +65,12 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
                 </Button>
             </header>
             <section>
-                {hasReminders && remindersList && todayKey
-                    ? remindersList[todayKey].map((reminder: reminderType, index: number) => {
-                          return reminder ? <ReminderDot key={index} onClick={() => handleEdit(reminder.id)} /> : null;
-                      })
-                    : null}
+                {todayReminders &&
+                    today &&
+                    today.slice(-2) === day.toString() &&
+                    todayReminders.map((reminder: reminderType, index: number) => {
+                        return <ReminderDot key={index} onClick={() => handleEdit(reminder.id)} />;
+                    })}
             </section>
         </Container>
     );

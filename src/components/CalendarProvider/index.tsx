@@ -6,17 +6,11 @@ import { IMonth } from '../MonthHeader';
 import { reminderType } from '../DayCell/Reminder';
 
 type SetString = (value: any | null) => void;
-type SetDic = (value: Dictionary<any[]> | Dictionary<never[]>) => void;
+type SetDic = (value: Dictionary<reminderType[]> | Dictionary<never[]>) => void;
 
 export interface CalendarContextInterface {
     hash?: string | null;
     setHash?: SetString;
-    dateTime?: string | null;
-    setDateTime?: SetString;
-    description?: string | null;
-    setDescription?: SetString;
-    color?: string | null;
-    setColor?: SetString;
     colors?: string[];
     hours?: string[];
     month?: IMonth | null;
@@ -29,8 +23,6 @@ export interface CalendarContextInterface {
     setReminders?: SetString;
     remindersList?: Dictionary<reminderType[]> | Dictionary<never[]>;
     setRemindersList?: SetDic;
-    todayKey?: string;
-    setTodayKey?: SetString;
     currentId?: string;
     setCurrentId?: SetString;
 }
@@ -67,28 +59,18 @@ const CalendarProvider: React.FC = (props) => {
     ];
 
     const [hash, setHash] = useState(null);
-    const [dateTime, setDateTime] = useState(null);
-    const [description, setDescription] = useState(null);
     const [month, setMonth] = useState(null);
-    const [color, setColor] = useState(null);
     const [togglePopOver, setTogglePopOver] = useState(false);
-    const [today, setToday] = useState(format(new Date(), 'yyyy-MM-dd'));
-    const [todayKey, setTodayKey] = useState('');
     const [reminders, setReminders] = useState([]);
-    const [currentId, setCurrentId] = useState('');
     const [remindersList, setRemindersList] = useState({});
+    const [today, setToday] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [currentId, setCurrentId] = useState('');
 
     return (
         <CalendarCtx.Provider
             value={{
                 hash,
                 setHash,
-                dateTime,
-                setDateTime,
-                description,
-                setDescription,
-                color,
-                setColor,
                 colors,
                 hours,
                 month,
@@ -97,8 +79,6 @@ const CalendarProvider: React.FC = (props) => {
                 setTogglePopOver,
                 today,
                 setToday,
-                todayKey,
-                setTodayKey,
                 reminders,
                 setReminders,
                 remindersList,
