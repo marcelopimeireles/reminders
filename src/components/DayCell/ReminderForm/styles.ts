@@ -117,4 +117,7 @@ export const SaveButton = styled.button`
         background-color: #00b300;
         transition: background-color 200ms linear;
     }
+    &:disabled {
+        background-color: #ccc;
+    }
 `;

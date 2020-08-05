@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, ChangeEvent, FormEvent } from '
 
 import { v1 as uuidV1 } from 'uuid';
 import format from 'date-fns/format';
-import { Dictionary, map, filter, groupBy, isEmpty } from 'lodash';
+import { Dictionary, map, groupBy, isEmpty } from 'lodash';
 
 import { CalendarCtx, CalendarContextInterface } from '../../CalendarProvider';
 
@@ -23,7 +23,7 @@ const ReminderForm: React.FC = () => {
     const [localDescription, setLocalDescription] = useState<string>('');
     const [localDate, setLocalDate] = useState<string>('');
     const [localTime, setLocalTime] = useState<string>('');
-    const [localId, setLocalId] = useState<string>(uuidV1());
+    const [localId, setLocalId] = useState<string>('');
     const [disabled, setDisabled] = useState<boolean>(true);
 
     type initHour = {
@@ -47,10 +47,8 @@ const ReminderForm: React.FC = () => {
     function isSubmitDisabled() {
         if (isEmpty(localTime) || isEmpty(localDate) || isEmpty(localDescription) || isEmpty(localColor)) {
             setDisabled(true);
-            console.log('setDisabled', true);
         } else {
             setDisabled(false);
-            console.log('setDisabled', false);
         }
     }
 
@@ -76,7 +74,7 @@ const ReminderForm: React.FC = () => {
                 return result;
             } else {
                 console.log('saveNew');
-                data.id = localId;
+                data.id = uuidV1();
                 result = [...result].concat(data);
             }
         }
@@ -116,19 +114,19 @@ const ReminderForm: React.FC = () => {
         })();
     }
 
-    function loadReminderById(id: string) {
-        const data: reminderType[] = filter(reminders, (reminder) => reminder.id === id);
+    function loadReminderById() {
+        const data: reminderType[] = reminders ? reminders.filter((reminder) => reminder.id === currentId) : [];
         const firstData = data[0];
-        firstData.description && setLocalDescription(firstData.description);
-        firstData.date && setLocalDate(firstData.date);
-        firstData.time && setLocalTime(firstData.time);
-        firstData.color && setLocalColor(firstData.color);
+        firstData?.id && setLocalId(firstData.id);
+        firstData?.description && setLocalDescription(firstData.description);
+        firstData?.date && setLocalDate(firstData.date);
+        firstData?.time && setLocalTime(firstData.time);
+        firstData?.color && setLocalColor(firstData.color);
     }
 
     useEffect(() => {
         if (togglePopOver === true && isEmpty(currentId)) {
             resetLocalValues();
-            setLocalId(uuidV1());
             return;
         }
 
@@ -141,7 +139,7 @@ const ReminderForm: React.FC = () => {
                 resetLocalValues();
             } else {
                 currentId && setLocalId(currentId);
-                loadReminderById(localId);
+                loadReminderById();
             }
         })();
     }, [togglePopOver]);
@@ -163,11 +161,12 @@ const ReminderForm: React.FC = () => {
                 <Textarea
                     name="description"
                     placeholder="Description"
+                    value={localDescription}
                     onChange={(e) => setLocalDescription(e.currentTarget.value)}
                 />
 
                 <ColorPicker>
-                    <TimePicker name="dateTime" onChange={(e) => changeHour(e)}>
+                    <TimePicker name="dateTime" value={localTime + ':00 AM'} onChange={(e) => changeHour(e)}>
                         {hours &&
                             hours.map((hour, index) => (
                                 <option key={index} value={hour}>
