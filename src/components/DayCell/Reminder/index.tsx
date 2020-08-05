@@ -45,6 +45,8 @@ const Reminder: React.FC = () => {
                     })[0]
                 );
             })();
+
+        if (localReminder) setIsEditMode(true);
     }, [togglePopOver, currentId, reminders]);
 
     return (
