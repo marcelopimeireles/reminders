@@ -1,19 +1,20 @@
 import React, { useState, useContext, useEffect, ChangeEvent, FormEvent } from 'react';
+import { FiTrash } from 'react-icons/fi';
 
 import { v1 as uuidV1 } from 'uuid';
 import format from 'date-fns/format';
-import { Dictionary, map, groupBy, isEmpty } from 'lodash';
+import { Dictionary, map, groupBy, isEmpty, remove } from 'lodash';
 
 import { CalendarCtx, CalendarContextInterface } from '../../CalendarProvider';
 
 import { reminderType } from '../Reminder';
 
-import { Container, Textarea, ColorPicker, Radio, RadioInput, TimePicker, Text, SaveButton } from './styles';
+import { Container, Textarea, ColorPicker, Radio, RadioInput, TimePicker, Text, SaveButton, Button } from './styles';
 
 const ReminderForm: React.FC = () => {
     const { togglePopOver, setTogglePopOver } = useContext<CalendarContextInterface>(CalendarCtx);
     const { reminders, setReminders } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { setRemindersList } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { remindersList, setRemindersList } = useContext<CalendarContextInterface>(CalendarCtx);
 
     const { today } = useContext<CalendarContextInterface>(CalendarCtx);
     const { currentId, setCurrentId } = useContext<CalendarContextInterface>(CalendarCtx);
@@ -68,12 +69,12 @@ const ReminderForm: React.FC = () => {
                 color: localColor,
             };
 
+            if (currentId && isEmpty(localId)) return buildDelete();
+
             if (currentId && currentId === localId) {
-                console.log('saveEdit');
                 result = map(result, (reminder) => (reminder.id === localId ? data : reminder));
                 return result;
             } else {
-                console.log('saveNew');
                 data.id = uuidV1();
                 result = [...result].concat(data);
             }
@@ -124,18 +125,32 @@ const ReminderForm: React.FC = () => {
         firstData?.color && setLocalColor(firstData.color);
     }
 
+    function handleDelete() {
+        setLocalId('');
+
+        (async () => {
+            setTogglePopOver && setTogglePopOver(false);
+        })();
+    }
+    function buildDelete() {
+        const newList: reminderType[] = [...reminders];
+        remove(newList, (reminder) => reminder.id === currentId);
+        return newList;
+    }
+
     useEffect(() => {
         if (togglePopOver === true && isEmpty(currentId)) {
             resetLocalValues();
             return;
         }
-
         (async () => {
             if (togglePopOver === false) {
                 const localReminders = await buildReminders();
-                setReminders && setReminders(localReminders);
-                setRemindersList && setRemindersList(buildRemindersList(localReminders));
-                setCurrentId && setCurrentId('');
+                (async () => {
+                    setReminders && (await setReminders(localReminders));
+                    setRemindersList && (await setRemindersList(buildRemindersList(localReminders)));
+                    setCurrentId && setCurrentId('');
+                })();
                 resetLocalValues();
             } else {
                 currentId && setLocalId(currentId);
@@ -157,6 +172,11 @@ const ReminderForm: React.FC = () => {
 
     return (
         <Container>
+            {localId ? (
+                <Button onClick={() => handleDelete()}>
+                    <FiTrash />
+                </Button>
+            ) : null}
             <form onSubmit={handleSubmit}>
                 <Textarea
                     name="description"

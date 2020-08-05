@@ -18,9 +18,8 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     const { month } = useContext<CalendarContextInterface>(CalendarCtx);
     const { togglePopOver, setTogglePopOver } = useContext<CalendarContextInterface>(CalendarCtx);
     const { today, setToday } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { remindersList } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { reminders, remindersList } = useContext<CalendarContextInterface>(CalendarCtx);
     const { setCurrentId } = useContext(CalendarCtx);
-    const { setIsEditMode } = useContext(CalendarCtx);
 
     const { day } = props;
 
@@ -32,9 +31,7 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     }
 
     function handleSetEditId(id = '') {
-        console.log('Edit id ', id);
         (async () => {
-            setIsEditMode && (await setIsEditMode(false));
             setCurrentId && (await setCurrentId(id));
         })();
         handleToggle();
@@ -53,14 +50,17 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     }
 
     useEffect(() => {
-        if (isEmpty(today) || isEmpty(remindersList)) return;
+        if (isEmpty(today) || isEmpty(remindersList)) {
+            setTodayReminders([]);
+            return;
+        }
 
         if (localToday && has(remindersList, localToday)) {
             (async () => {
                 localToday && remindersList && setTodayReminders(remindersList[localToday]);
             })();
         }
-    }, [today, remindersList]);
+    }, [today, reminders, remindersList]);
 
     return (
         <Container>

@@ -121,3 +121,5 @@ export const SaveButton = styled.button`
         background-color: #ccc;
     }
 `;
+
+export const Button = styled.button``;
