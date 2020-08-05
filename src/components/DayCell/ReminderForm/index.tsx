@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, ChangeEvent, FormEvent } from '
 
 import { v1 as uuidV1 } from 'uuid';
 import format from 'date-fns/format';
-import { Dictionary, groupBy, isEmpty } from 'lodash';
+import { Dictionary, map, groupBy, isEmpty } from 'lodash';
 
 import { CalendarCtx, CalendarContextInterface } from '../../CalendarProvider';
 
@@ -72,6 +72,7 @@ const ReminderForm: React.FC = () => {
 
             if (currentId === localId) {
                 console.log('saveEdit');
+                result = map(result, (reminder) => (reminder.id === localId ? data : reminder));
                 return result;
             } else {
                 console.log('saveNew');
@@ -90,7 +91,6 @@ const ReminderForm: React.FC = () => {
     }
 
     function buildRemindersList(localReminders: reminderType[]) {
-        console.log('buildRemindersList: ', localReminders);
         const newList: Dictionary<reminderType[]> = groupBy(localReminders, 'date');
         return newList;
     }
