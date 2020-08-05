@@ -20,6 +20,7 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     const { today, setToday } = useContext<CalendarContextInterface>(CalendarCtx);
     const { remindersList } = useContext<CalendarContextInterface>(CalendarCtx);
     const { setCurrentId } = useContext(CalendarCtx);
+    const { setIsEditMode } = useContext(CalendarCtx);
 
     const { day } = props;
 
@@ -33,6 +34,7 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     function handleSetEditId(id = '') {
         console.log('Edit id ', id);
         (async () => {
+            setIsEditMode && (await setIsEditMode(false));
             setCurrentId && (await setCurrentId(id));
         })();
         handleToggle();

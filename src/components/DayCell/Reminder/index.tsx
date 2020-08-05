@@ -18,9 +18,9 @@ export type reminderType = {
 const Reminder: React.FC = () => {
     const { currentId, togglePopOver } = useContext(CalendarCtx);
     const { reminders, setReminders } = useContext(CalendarCtx);
+    const { isEditMode, setIsEditMode } = useContext(CalendarCtx);
 
     const [localReminder, setlocalReminder] = useState<reminderType>({});
-    const [isEditMode, setIsEditMode] = useState<boolean>(false);
 
     function handleDelete(data: reminderType) {
         const { id } = data;
@@ -40,7 +40,10 @@ const Reminder: React.FC = () => {
                 setlocalReminder(localRem[0]);
             })();
 
-        if (localReminder) setIsEditMode(true);
+        if (localReminder)
+            (async () => {
+                setIsEditMode && setIsEditMode(true);
+            })();
     }, [togglePopOver, currentId, reminders]);
 
     return (
@@ -53,7 +56,7 @@ const Reminder: React.FC = () => {
                         <Button onClick={() => handleDelete(localReminder)}>
                             <FiTrash />
                         </Button>
-                        <Button onClick={() => setIsEditMode(true)}>
+                        <Button onClick={() => setIsEditMode && setIsEditMode(true)}>
                             <FiEdit />
                         </Button>
                     </Tools>

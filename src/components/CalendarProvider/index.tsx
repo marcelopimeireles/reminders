@@ -25,6 +25,8 @@ export interface CalendarContextInterface {
     setRemindersList?: SetDic;
     currentId?: string;
     setCurrentId?: SetString;
+    isEditMode?: boolean;
+    setIsEditMode?: SetString;
 }
 
 export const CalendarCtx = createContext<CalendarContextInterface>({});
@@ -65,6 +67,7 @@ const CalendarProvider: React.FC = (props) => {
     const [remindersList, setRemindersList] = useState({});
     const [today, setToday] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [currentId, setCurrentId] = useState('');
+    const [isEditMode, setIsEditMode] = useState(false);
 
     return (
         <CalendarCtx.Provider
@@ -85,6 +88,8 @@ const CalendarProvider: React.FC = (props) => {
                 setRemindersList,
                 currentId,
                 setCurrentId,
+                isEditMode,
+                setIsEditMode,
             }}
         >
             {props?.children}

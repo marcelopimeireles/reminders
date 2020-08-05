@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, ChangeEvent, FormEvent } from '
 
 import { v1 as uuidV1 } from 'uuid';
 import format from 'date-fns/format';
-import { Dictionary, map, groupBy, isEmpty } from 'lodash';
+import { Dictionary, map, filter, groupBy, isEmpty } from 'lodash';
 
 import { CalendarCtx, CalendarContextInterface } from '../../CalendarProvider';
 
@@ -16,14 +16,14 @@ const ReminderForm: React.FC = () => {
     const { setRemindersList } = useContext<CalendarContextInterface>(CalendarCtx);
 
     const { today } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { currentId } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { currentId, setCurrentId } = useContext<CalendarContextInterface>(CalendarCtx);
     const { colors, hours } = useContext<CalendarContextInterface>(CalendarCtx);
 
     const [localColor, setLocalColor] = useState<string>('');
     const [localDescription, setLocalDescription] = useState<string>('');
     const [localDate, setLocalDate] = useState<string>('');
     const [localTime, setLocalTime] = useState<string>('');
-    const [localId, setLocaltId] = useState<string>(uuidV1());
+    const [localId, setLocalId] = useState<string>(uuidV1());
     const [disabled, setDisabled] = useState<boolean>(true);
 
     type initHour = {
@@ -70,7 +70,7 @@ const ReminderForm: React.FC = () => {
                 color: localColor,
             };
 
-            if (currentId === localId) {
+            if (currentId && currentId === localId) {
                 console.log('saveEdit');
                 result = map(result, (reminder) => (reminder.id === localId ? data : reminder));
                 return result;
@@ -84,7 +84,7 @@ const ReminderForm: React.FC = () => {
     }
 
     function resetLocalValues() {
-        setLocaltId(uuidV1());
+        setLocalId('');
         setLocalDescription('');
         setLocalDate('');
         setLocalColor('');
@@ -116,25 +116,42 @@ const ReminderForm: React.FC = () => {
         })();
     }
 
+    function loadReminderById(id: string) {
+        const data: reminderType[] = filter(reminders, (reminder) => reminder.id === id);
+        const firstData = data[0];
+        firstData.description && setLocalDescription(firstData.description);
+        firstData.date && setLocalDate(firstData.date);
+        firstData.time && setLocalTime(firstData.time);
+        firstData.color && setLocalColor(firstData.color);
+    }
+
+    useEffect(() => {
+        if (togglePopOver === true && isEmpty(currentId)) {
+            resetLocalValues();
+            setLocalId(uuidV1());
+            return;
+        }
+
+        (async () => {
+            if (togglePopOver === false) {
+                const localReminders = await buildReminders();
+                setReminders && setReminders(localReminders);
+                setRemindersList && setRemindersList(buildRemindersList(localReminders));
+                setCurrentId && setCurrentId('');
+                resetLocalValues();
+            } else {
+                currentId && setLocalId(currentId);
+                loadReminderById(localId);
+            }
+        })();
+    }, [togglePopOver]);
+
     useEffect(() => {
         if (hours) {
             initHour.target.value = hours[0];
             changeHour(initHour);
         }
     }, [hours]);
-
-    useEffect(() => {
-        if (togglePopOver === true) {
-            resetLocalValues();
-            return;
-        }
-
-        (async () => {
-            const localReminders = await buildReminders();
-            setReminders && setReminders(localReminders);
-            setRemindersList && setRemindersList(buildRemindersList(localReminders));
-        })();
-    }, [togglePopOver]);
 
     useEffect(() => {
         isSubmitDisabled();
