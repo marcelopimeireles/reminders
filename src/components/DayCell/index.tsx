@@ -23,15 +23,18 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
 
     const { day } = props;
 
+    const [localToday, setLocalToday] = useState<string | null>('');
     const [todayReminders, setTodayReminders] = useState<reminderType[] | null>([]);
 
     function handleDay(day: number): string {
         return ('0' + day.toString()).slice(-2);
     }
 
-    function handleEdit(id = '') {
+    function handleSetEditId(id = '') {
         console.log('Edit id ', id);
-        setCurrentId && setCurrentId(id);
+        (async () => {
+            setCurrentId && (await setCurrentId(id));
+        })();
         handleToggle();
     }
 
@@ -39,6 +42,7 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
         const prefix = handleDay(day);
         const todayString = `${month?.currentMonth?.date}-${prefix}`;
         const today = format(new Date(todayString), 'yyyy-MM-dd');
+        setLocalToday(today);
 
         (async () => {
             setToday && setToday(today);
@@ -49,9 +53,9 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
     useEffect(() => {
         if (isEmpty(today) || isEmpty(remindersList)) return;
 
-        if (today && has(remindersList, today)) {
+        if (localToday && has(remindersList, localToday)) {
             (async () => {
-                today && remindersList && setTodayReminders(remindersList[today]);
+                localToday && remindersList && setTodayReminders(remindersList[localToday]);
             })();
         }
     }, [today, remindersList]);
@@ -67,9 +71,15 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
             <section>
                 {todayReminders &&
                     today &&
-                    today.slice(-2) === day.toString() &&
+                    localToday?.slice(-2) === handleDay(day) &&
                     todayReminders.map((reminder: reminderType, index: number) => {
-                        return <ReminderDot key={index} onClick={() => handleEdit(reminder.id)} />;
+                        return (
+                            <ReminderDot
+                                key={index}
+                                color={reminder.color}
+                                onClick={() => handleSetEditId(reminder.id)}
+                            />
+                        );
                     })}
             </section>
         </Container>

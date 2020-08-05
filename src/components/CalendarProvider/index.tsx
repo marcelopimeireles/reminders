@@ -1,5 +1,5 @@
 import React, { useState, createContext } from 'react';
-import { format } from 'date-fns';
+import format from 'date-fns/format';
 import { Dictionary } from 'lodash';
 
 import { IMonth } from '../MonthHeader';

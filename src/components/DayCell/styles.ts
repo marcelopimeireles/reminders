@@ -86,6 +86,7 @@ export const ReminderDot = styled.button`
     border-radius: 50%;
     background-color: ${(props) => props.color};
     box-sizing: border-box;
+    border: 0;
 
     &:hover {
         margin: 8px 8px 0 8px;

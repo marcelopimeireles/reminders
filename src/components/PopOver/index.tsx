@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { format } from 'date-fns';
+import format from 'date-fns/format';
 
 import Reminder from '../DayCell/Reminder';
 

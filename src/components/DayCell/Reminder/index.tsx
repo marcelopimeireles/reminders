@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { FiTrash, FiEdit } from 'react-icons/fi';
-
+import remove from 'lodash/remove';
+import filter from 'lodash/filter';
 import { CalendarCtx } from '../../CalendarProvider';
 import ReminderForm from '../ReminderForm';
 
@@ -21,17 +22,11 @@ const Reminder: React.FC = () => {
     const [localReminder, setlocalReminder] = useState<reminderType>({});
     const [isEditMode, setIsEditMode] = useState<boolean>(false);
 
-    const [delReminders, setDelReminders] = useState<reminderType[]>([]);
-
     function handleDelete(data: reminderType) {
-        const id = data.id;
-        setDelReminders(
-            [...reminders].filter((item: reminderType) => {
-                return item.id !== id;
-            })
-        );
+        const { id } = data;
+        const deletedInList = remove([...reminders], (reminder) => (reminder.id = id));
         (async () => {
-            setReminders && setReminders(delReminders);
+            setReminders && setReminders(deletedInList);
         })();
     }
 
@@ -39,11 +34,10 @@ const Reminder: React.FC = () => {
         if (togglePopOver === false) return;
         if (currentId)
             (async () => {
-                setlocalReminder(
-                    [...reminders].filter((reminder) => {
-                        reminder.id ? reminder.id === currentId : null;
-                    })[0]
-                );
+                const localRem: reminderType[] | any =
+                    reminders &&
+                    filter([...reminders], (reminder: reminderType) => reminder.id && reminder.id === currentId);
+                setlocalReminder(localRem[0]);
             })();
 
         if (localReminder) setIsEditMode(true);
