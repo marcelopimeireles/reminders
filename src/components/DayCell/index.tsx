@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Dictionary, groupBy, isEmpty, has } from 'lodash';
+import { isEmpty, has } from 'lodash';
 
 import { reminderType } from './Reminder';
 

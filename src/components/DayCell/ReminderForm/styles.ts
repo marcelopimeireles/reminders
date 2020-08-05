@@ -24,7 +24,7 @@ export const Textarea = styled.textarea`
 
 export const TimePicker = styled.select`
     margin: 4px 0 0 0;
-    height: 40px;
+    height: 35px;
     padding: 8px;
 `;
 
@@ -49,6 +49,9 @@ export const Radio = styled.div`
     flex-direction: row;
     justify-content: space-evenly;
     width: 100%;
+    height: 25px;
+    margin: 12px 0 0 8px;
+
     > .label {
         width: 100%;
     }
@@ -95,8 +98,8 @@ export const RadioInput = styled.input.attrs((props: reminderType) => ({
 
 export const Text = styled.div`
     display: inline-flex;
-    margin-left: 4px;
-    vertical-align: text-bottom;
+    margin-left: 8px;
+    vertical-align: text-top;
     font-size: 14px;
     color: #666;
 `;

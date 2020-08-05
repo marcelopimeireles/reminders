@@ -1,8 +1,8 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, ChangeEvent, FormEvent } from 'react';
 
 import { v1 as uuidV1 } from 'uuid';
-import { format } from 'date-fns';
-import { Dictionary, groupBy } from 'lodash';
+import format from 'date-fns/format';
+import { Dictionary, groupBy, isEmpty, has } from 'lodash';
 
 import { CalendarCtx, CalendarContextInterface } from '../../CalendarProvider';
 
@@ -13,7 +13,7 @@ import { Container, Textarea, ColorPicker, Radio, RadioInput, TimePicker, Text, 
 const ReminderForm: React.FC = () => {
     const { togglePopOver, setTogglePopOver } = useContext<CalendarContextInterface>(CalendarCtx);
     const { reminders, setReminders } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { remindersList, setRemindersList } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { setRemindersList } = useContext<CalendarContextInterface>(CalendarCtx);
 
     const { today } = useContext<CalendarContextInterface>(CalendarCtx);
     const { currentId } = useContext<CalendarContextInterface>(CalendarCtx);
@@ -24,14 +24,35 @@ const ReminderForm: React.FC = () => {
     const [localDate, setLocalDate] = useState<string>('');
     const [localTime, setLocalTime] = useState<string>('');
     const [localId, seLocaltId] = useState<string>(uuidV1());
+    const [disabled, setDisabled] = useState<boolean>(true);
 
-    function handleSubmit(e: any) {
+    type initHour = {
+        preventDefault: () => void;
+        target: { value: string | undefined };
+    };
+
+    const initHour: initHour = {
+        preventDefault: () => {
+            return;
+        },
+        target: { value: '' },
+    };
+
+    function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
         e.stopPropagation();
         (async () => {
             buildReminders();
         })();
         setTogglePopOver && setTogglePopOver(!togglePopOver);
+    }
+
+    function isSubmitDisabled() {
+        if (isEmpty(localTime) || isEmpty(localDate) || isEmpty(localDescription) || isEmpty(localColor)) {
+            setDisabled(true);
+        } else {
+            setDisabled(false);
+        }
     }
 
     function buildReminders() {
@@ -59,7 +80,7 @@ const ReminderForm: React.FC = () => {
                 // saveNew
                 console.log('saveNew');
                 data.id = localId;
-                result = [...result].concat(data);
+                result = result.concat(data);
                 console.log(result);
                 setReminders && setReminders(result);
             }
@@ -79,16 +100,15 @@ const ReminderForm: React.FC = () => {
         // setRemindersList ? setRemindersList(newList) : null;
     }
 
-    function changeHour(e: any = null) {
-        console.log('change: ', e.target.value);
+    function changeHour(e: ChangeEvent<HTMLSelectElement> | initHour = initHour) {
         e.preventDefault();
-        const hourArray: string[] = e ? e.target.value.split(':') : hours && hours[0].split(':');
-        let result = Number(hourArray[0]);
+        const hourArray: string[] | undefined = e.target.value?.split(':');
+        let result = hourArray && Number(hourArray[0]);
         let date: Date;
-        if (hourArray.length > 0 && hourArray[1].indexOf('PM') !== -1) {
-            result = result + 12;
+        if (hourArray && hourArray.length > 0 && hourArray[1].indexOf('PM') !== -1) {
+            result = Number(result) + 12;
         }
-        const prefix = ('0' + result.toString()).slice(-2);
+        const prefix = ('0' + result?.toString()).slice(-2);
         console.log(prefix);
 
         (async () => {
@@ -104,15 +124,25 @@ const ReminderForm: React.FC = () => {
     }
 
     useEffect(() => {
-        if (togglePopOver === true) return;
+        if (hours) initHour.target.value = hours[0];
+
+        isSubmitDisabled();
+        if (togglePopOver === true) {
+            resetLocalValues();
+            seLocaltId(uuidV1());
+            return;
+        }
         (async () => {
             buildReminders();
             if (reminders?.length === 0) return;
             setRemindersList && setRemindersList(buildRemindersList());
             console.log(reminders);
-            resetLocalValues();
         })();
-    }, [togglePopOver]);
+    }, [hours, togglePopOver]);
+
+    useEffect(() => {
+        isSubmitDisabled();
+    }, [localDate, localTime, localColor, localDescription]);
 
     return (
         <Container>
@@ -123,16 +153,15 @@ const ReminderForm: React.FC = () => {
                     onChange={(e) => setLocalDescription(e.currentTarget.value)}
                 />
 
-                <TimePicker name="dateTime" onChange={(e) => changeHour(e)}>
-                    {hours &&
-                        hours.map((hour, index) => (
-                            <option key={index} value={hour}>
-                                {hour}
-                            </option>
-                        ))}
-                </TimePicker>
-
                 <ColorPicker>
+                    <TimePicker name="dateTime" onChange={(e) => changeHour(e)}>
+                        {hours &&
+                            hours.map((hour, index) => (
+                                <option key={index} value={hour}>
+                                    {hour}
+                                </option>
+                            ))}
+                    </TimePicker>
                     {colors &&
                         colors.map((color, index) => {
                             return (
@@ -147,7 +176,9 @@ const ReminderForm: React.FC = () => {
                         })}
                 </ColorPicker>
 
-                <SaveButton className="btn-submit">Salvar</SaveButton>
+                <SaveButton className="btn-submit" disabled={disabled}>
+                    Salvar
+                </SaveButton>
             </form>
         </Container>
     );
