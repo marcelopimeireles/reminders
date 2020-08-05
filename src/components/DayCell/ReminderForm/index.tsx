@@ -148,9 +148,14 @@ const ReminderForm: React.FC = () => {
                 const localReminders = await buildReminders();
                 (async () => {
                     setReminders && (await setReminders(localReminders));
-                    setRemindersList && (await setRemindersList(buildRemindersList(localReminders)));
-                    setCurrentId && setCurrentId('');
+                    localStorage.setItem('reminders', JSON.stringify(localReminders));
                 })();
+                const localRemindersList = await buildRemindersList(localReminders);
+                (async () => {
+                    setRemindersList && (await setRemindersList(localRemindersList));
+                    localStorage.setItem('remindersList', JSON.stringify(localRemindersList));
+                })();
+                setCurrentId && setCurrentId('');
                 resetLocalValues();
             } else {
                 currentId && setLocalId(currentId);
