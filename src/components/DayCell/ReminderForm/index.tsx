@@ -23,7 +23,7 @@ const ReminderForm: React.FC = () => {
     const [localDescription, setLocalDescription] = useState<string>('');
     const [localDate, setLocalDate] = useState<string>('');
     const [localTime, setLocalTime] = useState<string>('');
-    const [localId, seLocaltId] = useState<string>(uuidV1());
+    const [localId, setLocaltId] = useState<string>(uuidV1());
     const [disabled, setDisabled] = useState<boolean>(true);
 
     type initHour = {
@@ -62,7 +62,6 @@ const ReminderForm: React.FC = () => {
             result = [...reminders];
         }
 
-        console.log(localDescription, localDate, localTime, localColor);
         if (localDescription && localDate && localTime && localColor) {
             const data: reminderType = {
                 id: currentId,
@@ -81,10 +80,12 @@ const ReminderForm: React.FC = () => {
                 console.log('saveNew');
                 data.id = localId;
                 result = result.concat(data);
-                console.log(result);
-                setReminders && setReminders(result);
             }
         }
+
+        async () => {
+            setReminders && setReminders(result);
+        };
     }
 
     function resetLocalValues() {
@@ -126,10 +127,9 @@ const ReminderForm: React.FC = () => {
     useEffect(() => {
         if (hours) initHour.target.value = hours[0];
 
-        isSubmitDisabled();
         if (togglePopOver === true) {
             resetLocalValues();
-            seLocaltId(uuidV1());
+            setLocaltId(uuidV1());
             return;
         }
         (async () => {
