@@ -11,7 +11,7 @@ import { Container, Close } from './styles';
 
 const PopOver: React.FC = () => {
     const { togglePopOver, setTogglePopOver } = useContext(CalendarCtx);
-    const { today, setToday } = useContext(CalendarCtx);
+    const { today } = useContext(CalendarCtx);
 
     const [localDay, setLocalDay] = useState('');
 

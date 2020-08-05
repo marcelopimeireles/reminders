@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, ChangeEvent, FormEvent } from '
 
 import { v1 as uuidV1 } from 'uuid';
 import format from 'date-fns/format';
-import { Dictionary, groupBy, isEmpty, has } from 'lodash';
+import { Dictionary, groupBy, isEmpty } from 'lodash';
 
 import { CalendarCtx, CalendarContextInterface } from '../../CalendarProvider';
 
@@ -41,17 +41,16 @@ const ReminderForm: React.FC = () => {
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
         e.stopPropagation();
-        (async () => {
-            buildReminders();
-        })();
         setTogglePopOver && setTogglePopOver(!togglePopOver);
     }
 
     function isSubmitDisabled() {
         if (isEmpty(localTime) || isEmpty(localDate) || isEmpty(localDescription) || isEmpty(localColor)) {
             setDisabled(true);
+            console.log('setDisabled', true);
         } else {
             setDisabled(false);
+            console.log('setDisabled', false);
         }
     }
 
@@ -72,33 +71,28 @@ const ReminderForm: React.FC = () => {
             };
 
             if (currentId === localId) {
-                // saveEdit
                 console.log('saveEdit');
                 return result;
             } else {
-                // saveNew
                 console.log('saveNew');
                 data.id = localId;
-                result = result.concat(data);
+                result = [...result].concat(data);
             }
         }
-
-        async () => {
-            setReminders && setReminders(result);
-        };
+        return result;
     }
 
     function resetLocalValues() {
+        setLocaltId(uuidV1());
         setLocalDescription('');
         setLocalDate('');
-        setLocalTime('');
         setLocalColor('');
     }
 
-    function buildRemindersList() {
-        const newList: Dictionary<reminderType[]> = groupBy(reminders, 'date');
+    function buildRemindersList(localReminders: reminderType[]) {
+        console.log('buildRemindersList: ', localReminders);
+        const newList: Dictionary<reminderType[]> = groupBy(localReminders, 'date');
         return newList;
-        // setRemindersList ? setRemindersList(newList) : null;
     }
 
     function changeHour(e: ChangeEvent<HTMLSelectElement> | initHour = initHour) {
@@ -110,7 +104,6 @@ const ReminderForm: React.FC = () => {
             result = Number(result) + 12;
         }
         const prefix = ('0' + result?.toString()).slice(-2);
-        console.log(prefix);
 
         (async () => {
             if (today) {
@@ -118,27 +111,30 @@ const ReminderForm: React.FC = () => {
             } else {
                 date = new Date(`${format(new Date(), 'yyyy-MM-dd')}T${prefix}:00:00Z`);
             }
-            console.log(`${today}T${prefix}:00:00Z`);
             setLocalDate(format(new Date(date), 'yyyy-MM-dd'));
             setLocalTime(prefix);
         })();
     }
 
     useEffect(() => {
-        if (hours) initHour.target.value = hours[0];
+        if (hours) {
+            initHour.target.value = hours[0];
+            changeHour(initHour);
+        }
+    }, [hours]);
 
+    useEffect(() => {
         if (togglePopOver === true) {
             resetLocalValues();
-            setLocaltId(uuidV1());
             return;
         }
+
         (async () => {
-            buildReminders();
-            if (reminders?.length === 0) return;
-            setRemindersList && setRemindersList(buildRemindersList());
-            console.log(reminders);
+            const localReminders = await buildReminders();
+            setReminders && setReminders(localReminders);
+            setRemindersList && setRemindersList(buildRemindersList(localReminders));
         })();
-    }, [hours, togglePopOver]);
+    }, [togglePopOver]);
 
     useEffect(() => {
         isSubmitDisabled();
