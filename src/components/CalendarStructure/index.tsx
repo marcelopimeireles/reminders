@@ -1,5 +1,6 @@
 import React, { useEffect, useContext } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+
 import { format, subMonths, getDaysInMonth, getWeeksInMonth, getDay, addMonths } from 'date-fns';
 
 import MonthHeader, { IMonth } from '../MonthHeader';
@@ -11,9 +12,18 @@ import { CalendarCtx, CalendarContextInterface } from '../CalendarProvider';
 
 import { Row, EmptyCell } from './styles';
 
+export interface IRemindersType {
+    id: string;
+    date: string;
+    time: string;
+    description: string;
+    color: string;
+}
+
 const CalendarStructure: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
-    const { hash, setHash } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { month, setMonth } = useContext<CalendarContextInterface>(CalendarCtx);
+    const { hash, setHash, month, setMonth, reminders, setReminders } = useContext<CalendarContextInterface>(
+        CalendarCtx
+    );
 
     function buildMonth(hash: string | null | undefined): IMonth | null {
         const currentHash: string = hash || format(new Date(), 'yyyy-MM');
@@ -37,6 +47,26 @@ const CalendarStructure: React.FC<RouteComponentProps> = (props: RouteComponentP
         };
     }
 
+    function loadLocalStorage() {
+        const localRemindersStorage = localStorage.getItem('reminders');
+
+        if (localRemindersStorage !== '[]') {
+            const localReminders: IRemindersType[] = localRemindersStorage ? JSON.parse(localRemindersStorage) : null;
+            mergeLocalStorage(localReminders);
+        } else {
+            localStorage.clear();
+        }
+        console.log('loadLocalStorage: ', localRemindersStorage);
+    }
+
+    function mergeLocalStorage(localReminders: IRemindersType[]) {
+        if (!!localReminders) setReminders && setReminders([...reminders].concat(localReminders));
+    }
+
+    useEffect(() => {
+        loadLocalStorage();
+    }, []); // load local storage when did mount
+
     useEffect(() => {
         props.location.pathname !== '/' && setHash && setMonth
             ? setHash(props.location.pathname.slice(1).replace('/', '-'))
@@ -44,7 +74,7 @@ const CalendarStructure: React.FC<RouteComponentProps> = (props: RouteComponentP
             ? setHash('')
             : null;
         setMonth ? setMonth(buildMonth(hash)) : null;
-    }, [hash, props.location.pathname]);
+    }, [props.location.pathname, hash]); // build calendar data when change url
 
     return (
         <>

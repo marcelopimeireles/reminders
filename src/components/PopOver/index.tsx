@@ -20,10 +20,8 @@ const PopOver: React.FC = () => {
     }
 
     useEffect(() => {
-        (async () => {
-            if (today && togglePopOver) setLocalDay(format(new Date(today), 'dd MMM yy'));
-        })();
-    }, [today, togglePopOver]);
+        if (today && togglePopOver) setLocalDay(format(new Date(today), 'dd MMM yy'));
+    }, [togglePopOver]); // set local day when toggle on
 
     return (
         <Container toggled={togglePopOver || false}>

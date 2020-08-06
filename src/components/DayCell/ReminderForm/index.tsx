@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, ChangeEvent, FormEvent } from 'react';
+import React, { useState, useContext, useEffect, useMemo, ChangeEvent, FormEvent } from 'react';
 import { FiTrash } from 'react-icons/fi';
 
 import { v1 as uuidV1 } from 'uuid';
@@ -12,18 +12,24 @@ import { reminderType } from '../Reminder';
 import { Container, Textarea, ColorPicker, Radio, RadioInput, TimePicker, Text, SaveButton, Button } from './styles';
 
 const ReminderForm: React.FC = () => {
-    const { togglePopOver, setTogglePopOver } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { reminders, setReminders } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { remindersList, setRemindersList } = useContext<CalendarContextInterface>(CalendarCtx);
-
-    const { today } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { currentId, setCurrentId } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { colors, hours } = useContext<CalendarContextInterface>(CalendarCtx);
+    const {
+        togglePopOver,
+        setTogglePopOver,
+        reminders,
+        setReminders,
+        remindersList,
+        setRemindersList,
+        today,
+        currentId,
+        setCurrentId,
+        colors,
+        hours,
+    } = useContext<CalendarContextInterface>(CalendarCtx);
 
     const [localColor, setLocalColor] = useState<string>('');
     const [localDescription, setLocalDescription] = useState<string>('');
     const [localDate, setLocalDate] = useState<string>('');
-    const [localTime, setLocalTime] = useState<string>('');
+    const [localTime, setLocalTime] = useState<string>('00');
     const [localId, setLocalId] = useState<string>('');
     const [disabled, setDisabled] = useState<boolean>(true);
 
@@ -53,44 +59,50 @@ const ReminderForm: React.FC = () => {
         }
     }
 
-    function buildReminders() {
-        let result: reminderType[] = [];
+    function buildRemindersById() {
+        const result: reminderType[] = [...reminders];
 
-        if (reminders) {
-            result = [...reminders];
-        }
+        const data: reminderType = {
+            id: currentId || uuidV1(),
+            description: localDescription,
+            date: localDate,
+            time: localTime,
+            color: localColor,
+        };
+        console.log(data);
 
-        if (localDescription && localDate && localTime && localColor) {
-            const data: reminderType = {
-                id: currentId,
-                description: localDescription,
-                date: localDate,
-                time: localTime,
-                color: localColor,
-            };
+        console.log(!!currentId, isEmpty(localId), 'buildDelete');
+        if (!!currentId && isEmpty(localId)) return buildDelete(result, currentId);
 
-            if (currentId && isEmpty(localId)) return buildDelete();
+        console.log(!!currentId, currentId === localId, 'buildUpdateById');
+        if (!!currentId && currentId === localId) return buildUpdateById(result, data, currentId);
 
-            if (currentId && currentId === localId) {
-                result = map(result, (reminder) => (reminder.id === localId ? data : reminder));
-                return result;
-            } else {
-                data.id = uuidV1();
-                result = [...result].concat(data);
-            }
-        }
+        console.log('buildCreate');
+        return buildCreate(result, data);
+    }
+
+    function buildDelete(result: reminderType[], id: string): reminderType[] {
+        remove(result, (reminder) => reminder.id === id);
         return result;
+    }
+
+    function buildUpdateById(result: reminderType[], data: reminderType, id: string): reminderType[] {
+        return map(result, (reminder) => (reminder.id === id ? data : reminder));
+    }
+
+    function buildCreate(result: reminderType[], data: reminderType) {
+        return [...result].concat(data);
     }
 
     function resetLocalValues() {
         setLocalId('');
         setLocalDescription('');
-        setLocalDate('');
         setLocalColor('');
+        changeHour();
     }
 
-    function buildRemindersList(localReminders: reminderType[]) {
-        const newList: Dictionary<reminderType[]> = groupBy(localReminders, 'date');
+    function buildRemindersList(reminders: reminderType[]) {
+        const newList: Dictionary<reminderType[]> = groupBy(reminders, 'date');
         return newList;
     }
 
@@ -99,7 +111,7 @@ const ReminderForm: React.FC = () => {
         const hourArray: string[] | undefined = e.target.value?.split(':');
         let result = hourArray && Number(hourArray[0]);
         let date: Date;
-        if (hourArray && hourArray.length > 0 && hourArray[1].indexOf('PM') !== -1) {
+        if (hourArray && hourArray.length > 0 && hourArray[hourArray.length - 1].indexOf('PM') !== -1) {
             result = Number(result) + 12;
         }
         const prefix = ('0' + result?.toString()).slice(-2);
@@ -115,65 +127,67 @@ const ReminderForm: React.FC = () => {
         })();
     }
 
-    function loadReminderById() {
-        const data: reminderType[] = reminders ? reminders.filter((reminder) => reminder.id === currentId) : [];
-        const firstData = data[0];
-        firstData?.id && setLocalId(firstData.id);
-        firstData?.description && setLocalDescription(firstData.description);
-        firstData?.date && setLocalDate(firstData.date);
-        firstData?.time && setLocalTime(firstData.time);
-        firstData?.color && setLocalColor(firstData.color);
+    function loadReminderById(id: string) {
+        const data: reminderType[] = reminders ? reminders.filter((reminder) => reminder.id === id) : [];
+        const firstData = data ? data[0] : null;
+        if (firstData) {
+            const { id, description, date, time, color } = firstData;
+            setLocalId(id || '');
+            setLocalDescription(description || '');
+            setLocalDate(date || '');
+            setLocalTime(time || '');
+            setLocalColor(color || '');
+        } else {
+            resetLocalValues();
+        }
     }
 
     function handleDelete() {
         setLocalId('');
-
-        (async () => {
-            setTogglePopOver && setTogglePopOver(false);
-        })();
-    }
-    function buildDelete() {
-        const newList: reminderType[] = [...reminders];
-        remove(newList, (reminder) => reminder.id === currentId);
-        return newList;
+        setTogglePopOver && setTogglePopOver(false);
     }
 
-    useEffect(() => {
-        if (togglePopOver === true && isEmpty(currentId)) {
-            resetLocalValues();
-            return;
-        }
-        (async () => {
-            if (togglePopOver === false) {
-                const localReminders = await buildReminders();
-                (async () => {
-                    setReminders && (await setReminders(localReminders));
-                    localStorage.setItem('reminders', JSON.stringify(localReminders));
-                })();
-                const localRemindersList = await buildRemindersList(localReminders);
-                (async () => {
-                    setRemindersList && (await setRemindersList(localRemindersList));
-                    localStorage.setItem('remindersList', JSON.stringify(localRemindersList));
-                })();
-                setCurrentId && setCurrentId('');
-                resetLocalValues();
-            } else {
-                currentId && setLocalId(currentId);
-                loadReminderById();
-            }
-        })();
-    }, [togglePopOver]);
-
-    useEffect(() => {
+    useMemo(() => {
         if (hours) {
             initHour.target.value = hours[0];
             changeHour(initHour);
         }
-    }, [hours]);
+    }, []); // set initHour when did mount
+
+    useEffect(() => {
+        if (togglePopOver && currentId) {
+            resetLocalValues();
+            // retrieve local reminder
+            console.log(' retrieve local reminder', currentId);
+            loadReminderById(currentId);
+            return;
+        }
+        // save new reminders (create, update, delete)
+        console.log('save new reminders (create, update, delete)', !disabled);
+        !disabled && reminders ? setReminders && setReminders(buildRemindersById()) : null;
+        resetLocalValues();
+        setCurrentId && setCurrentId('');
+    }, [togglePopOver, setReminders]); // create, update, delete when toggle off or retrieve when toggle on
+
+    useEffect(() => {
+        reminders && setRemindersList && setRemindersList(buildRemindersList(reminders));
+    }, [reminders, setRemindersList]); // generate and update reminders list when update reminders
+
+    useEffect(() => {
+        console.log('localstorage: ', isEmpty(reminders), !reminders);
+        if (!isEmpty(reminders) && !isEmpty(remindersList)) {
+            console.log(reminders, remindersList);
+            localStorage.setItem('reminders', JSON.stringify(reminders));
+            localStorage.setItem('remindersList', JSON.stringify(remindersList));
+        } else if (!reminders) {
+            console.log('clear localstorage: ', reminders, remindersList);
+            localStorage.clear();
+        }
+    }, [reminders, remindersList]); // save reminders and reminders list to local storage when update reminders list
 
     useEffect(() => {
         isSubmitDisabled();
-    }, [localDate, localTime, localColor, localDescription]);
+    }, [localDate, localTime, localColor, localDescription]); // check ready for submit when change data
 
     return (
         <Container>
@@ -199,6 +213,7 @@ const ReminderForm: React.FC = () => {
                                 </option>
                             ))}
                     </TimePicker>
+
                     {colors &&
                         colors.map((color, index) => {
                             return (

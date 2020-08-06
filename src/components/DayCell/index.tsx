@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { isEmpty, has } from 'lodash';
+import { has, filter } from 'lodash';
 
 import { reminderType } from './Reminder';
 
@@ -15,52 +15,51 @@ type DayCellProps = {
 };
 
 const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
-    const { month } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { togglePopOver, setTogglePopOver } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { today, setToday } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { reminders, remindersList } = useContext<CalendarContextInterface>(CalendarCtx);
-    const { setCurrentId } = useContext(CalendarCtx);
+    const { month, togglePopOver, setTogglePopOver, setToday, remindersList, setCurrentId } = useContext<
+        CalendarContextInterface
+    >(CalendarCtx);
 
     const { day } = props;
 
-    const [localToday, setLocalToday] = useState<string | null>('');
+    const [localToday, setLocalToday] = useState<string>('');
     const [todayReminders, setTodayReminders] = useState<reminderType[] | null>([]);
 
     function handleDay(day: number): string {
         return ('0' + day.toString()).slice(-2);
     }
 
-    function handleSetEditId(id = '') {
+    function handleSetEditById(id = '') {
         (async () => {
             setCurrentId && (await setCurrentId(id));
         })();
         handleToggle();
     }
 
-    function handleToggle() {
+    function handleToday() {
         const prefix = handleDay(day);
         const todayString = `${month?.currentMonth?.date}-${prefix}`;
-        const today = format(new Date(todayString), 'yyyy-MM-dd');
-        setLocalToday(today);
+        return format(new Date(todayString), 'yyyy-MM-dd');
+    }
 
+    function handleToggle() {
         (async () => {
-            setToday && setToday(today);
+            setToday && setToday(localToday);
             setTogglePopOver && setTogglePopOver(!togglePopOver);
         })();
     }
 
     useEffect(() => {
-        if (isEmpty(today) || isEmpty(remindersList)) {
-            setTodayReminders([]);
-            return;
-        }
+        setLocalToday(handleToday());
+    }, []); // set every day when did mount
 
-        if (localToday && has(remindersList, localToday)) {
+    useEffect(() => {
+        // console.log('rebuild dots: ', localToday, has(remindersList, localToday));
+        if (localToday) {
             (async () => {
                 localToday && remindersList && setTodayReminders(remindersList[localToday]);
             })();
         }
-    }, [today, reminders, remindersList]);
+    }, [remindersList, setTodayReminders, localToday]); // set today reminders list what change reminderslist
 
     return (
         <Container>
@@ -71,18 +70,9 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
                 </Button>
             </header>
             <section>
-                {todayReminders &&
-                    today &&
-                    localToday?.slice(-2) === handleDay(day) &&
-                    todayReminders.map((reminder: reminderType, index: number) => {
-                        return (
-                            <ReminderDot
-                                key={index}
-                                color={reminder.color}
-                                onClick={() => handleSetEditId(reminder.id)}
-                            />
-                        );
-                    })}
+                {filter(todayReminders, (reminder) => reminder.date === localToday).map((reminder, index) => (
+                    <ReminderDot key={index} color={reminder.color} onClick={() => handleSetEditById(reminder.id)} />
+                ))}
             </section>
         </Container>
     );
