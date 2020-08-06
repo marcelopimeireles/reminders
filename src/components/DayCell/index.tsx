@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { has, filter } from 'lodash';
+import { filter } from 'lodash';
 
 import { reminderType } from './Reminder';
 
@@ -50,7 +50,7 @@ const DayCell: React.FC<DayCellProps> = (props: DayCellProps) => {
 
     useEffect(() => {
         setLocalToday(handleToday());
-    }, []); // set every day when did mount
+    }, [month]); // set every day when did mount
 
     useEffect(() => {
         // console.log('rebuild dots: ', localToday, has(remindersList, localToday));
