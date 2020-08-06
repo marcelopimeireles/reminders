@@ -3,6 +3,9 @@ import { FiTrash } from 'react-icons/fi';
 
 import { v1 as uuidV1 } from 'uuid';
 import format from 'date-fns/format';
+import getTime from 'date-fns/getTime';
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
+
 import { Dictionary, map, groupBy, isEmpty, remove } from 'lodash';
 
 import { CalendarCtx, CalendarContextInterface } from '../../CalendarProvider';
@@ -69,15 +72,11 @@ const ReminderForm: React.FC = () => {
             time: localTime,
             color: localColor,
         };
-        console.log(data);
 
-        console.log(!!currentId, isEmpty(localId), 'buildDelete');
         if (!!currentId && isEmpty(localId)) return buildDelete(result, currentId);
 
-        console.log(!!currentId, currentId === localId, 'buildUpdateById');
         if (!!currentId && currentId === localId) return buildUpdateById(result, data, currentId);
 
-        console.log('buildCreate');
         return buildCreate(result, data);
     }
 
@@ -158,12 +157,11 @@ const ReminderForm: React.FC = () => {
         if (togglePopOver && currentId) {
             resetLocalValues();
             // retrieve local reminder
-            console.log(' retrieve local reminder', currentId);
             loadReminderById(currentId);
             return;
         }
         // save new reminders (create, update, delete)
-        console.log('save new reminders (create, update, delete)', !disabled);
+        // console.log('save new reminders (create, update, delete)', !disabled);
         !disabled && reminders ? setReminders && setReminders(buildRemindersById()) : null;
         resetLocalValues();
         setCurrentId && setCurrentId('');
@@ -174,16 +172,43 @@ const ReminderForm: React.FC = () => {
     }, [reminders, setRemindersList]); // generate and update reminders list when update reminders
 
     useEffect(() => {
-        console.log('localstorage: ', isEmpty(reminders), !reminders);
         if (!isEmpty(reminders) && !isEmpty(remindersList)) {
-            console.log(reminders, remindersList);
             localStorage.setItem('reminders', JSON.stringify(reminders));
             localStorage.setItem('remindersList', JSON.stringify(remindersList));
         } else if (!reminders) {
-            console.log('clear localstorage: ', reminders, remindersList);
             localStorage.clear();
         }
     }, [reminders, remindersList]); // save reminders and reminders list to local storage when update reminders list
+
+    useEffect(() => {
+        if (reminders)
+            for (const reminder of reminders) {
+                if (window.Notification && Notification.permission !== 'denied') {
+                    Notification.requestPermission(function (status) {
+                        new Notification(`${reminder.description}`, {
+                            body: formatDistanceToNow(new Date(`${reminder.date}T${reminder.time}:00:00Z`), {
+                                addSuffix: true,
+                            }),
+                            timestamp: getTime(new Date(`${reminder.date}T${reminder.time}:00:00Z`)),
+                        });
+                    });
+                }
+            }
+    }, [reminders]); // set reminders as notification
+
+    useEffect(() => {
+        if (togglePopOver)
+            if (window.Notification && Notification.permission !== 'denied') {
+                Notification.requestPermission(function (status) {
+                    new Notification(`${localDescription}`, {
+                        body: formatDistanceToNow(new Date(`${localDate}T${localTime}:00:00Z`), {
+                            addSuffix: true,
+                        }),
+                        timestamp: getTime(new Date(`${localDate}T${localTime}:00:00Z`)),
+                    });
+                });
+            }
+    }, [togglePopOver]); // show reminders as notification
 
     useEffect(() => {
         isSubmitDisabled();
