@@ -4,35 +4,6 @@ interface IPopOver {
     toggled: boolean;
 }
 
-export const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    background: rgba(255, 255, 255, 0.25);
-    margin: 2px;
-    padding: 6px;
-    color: rgb(0, 0, 0, 0.125);
-    font-weight: 600;
-    font-size: 1.5em;
-    text-align: center;
-    flex: 1 0 0px;
-    min-width: 1.5em;
-    justify-items: stretch;
-    min-height: 10vh;
-    box-sizing: border-box;
-
-    &:hover {
-        background-color: rgba(255, 255, 255, 0.75);
-        color: #e36463;
-        transition: background-color 200ms linear;
-    }
-
-    header {
-        display: inline-flex;
-        text-align: left;
-        justify-content: space-between;
-    }
-`;
-
 export const Close = styled.button`
     border: 0;
     background: 0;
@@ -63,12 +34,6 @@ export const Button = styled.button`
         color: white;
     }
 
-    ${Container}:hover & {
-        display: block;
-        opacity: 1;
-        transition: opacity 400ms linear;
-    }
-
     &:hover {
         & > svg {
             transform: scale(1.5);
@@ -77,25 +42,7 @@ export const Button = styled.button`
     }
 `;
 
-export const ReminderDot = styled.button`
-    display: inline-block;
-    margin: 8px 8px 0 8px;
-    padding: 0;
-    height: 8px;
-    width: 8px;
-    border-radius: 50%;
-    background-color: ${(props) => props.color};
-    box-sizing: border-box;
-    border: 0;
-
-    &:hover {
-        margin: 8px 8px 0 8px;
-        border: 1px solid rgba(255, 255, 255, 0.75);
-        box-shadow: 0 0 5px ${(props) => props.color};
-    }
-`;
-
-export const PopOver = styled.div<IPopOver>`
+export const Container = styled.div<IPopOver>`
     padding: 8px;
     display: ${(props) => (props.toggled ? 'block' : 'none')};
     min-height: 20vh;
